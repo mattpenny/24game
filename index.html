@@ -425,9 +425,15 @@
         inputField.value = inputField.value.slice(0, -1);
     }
 
-    // --- LOGIC: SOLVER MATRIX ---
+    // --- LOGIC: PATCHED SOLVER MATRIX ---
     function solve24(numbers, expressions) {
-        if (numbers.length === 1) return Math.abs(numbers[0] - 24) < 0.001;
+        if (numbers.length === 1) {
+            if (Math.abs(numbers[0] - 24) < 0.001) {
+                currentSolution = expressions[0];
+                return true;
+            }
+            return false;
+        }
         for (let i = 0; i < numbers.length; i++) {
             for (let j = 0; j < numbers.length; j++) {
                 if (i === j) continue;
@@ -440,20 +446,20 @@
 
                 if (i < j) {
                     nextNums.push(n1 + n2); nextExprs.push(`(${e1} + ${e2})`);
-                    if (solve24(nextNums, nextExprs)) { currentSolution = nextExprs[nextExprs.length-1]; return true; }
+                    if (solve24(nextNums, nextExprs)) return true;
                     nextNums.pop(); nextExprs.pop();
                 }
                 nextNums.push(n1 - n2); nextExprs.push(`(${e1} - ${e2})`);
-                if (solve24(nextNums, nextExprs)) { currentSolution = nextExprs[nextExprs.length-1]; return true; }
+                if (solve24(nextNums, nextExprs)) return true;
                 nextNums.pop(); nextExprs.pop();
                 if (i < j) {
                     nextNums.push(n1 * n2); nextExprs.push(`(${e1} × ${e2})`);
-                    if (solve24(nextNums, nextExprs)) { currentSolution = nextExprs[nextExprs.length-1]; return true; }
+                    if (solve24(nextNums, nextExprs)) return true;
                     nextNums.pop(); nextExprs.pop();
                 }
                 if (Math.abs(n2) > 0.0001) {
                     nextNums.push(n1 / n2); nextExprs.push(`(${e1} ÷ ${e2})`);
-                    if (solve24(nextNums, nextExprs)) { currentSolution = nextExprs[nextExprs.length-1]; return true; }
+                    if (solve24(nextNums, nextExprs)) return true;
                     nextNums.pop(); nextExprs.pop();
                 }
             }
@@ -517,6 +523,7 @@
             let digits = [];
             while (true) {
                 digits = [Math.floor(Math.random()*10), Math.floor(Math.random()*10), Math.floor(Math.random()*10), Math.floor(Math.random()*10)];
+                currentSolution = "";
                 if (solve24([...digits], digits.map(d=>d.toString()))) break;
             }
             if (currentSolution.startsWith('(') && currentSolution.endsWith(')')) currentSolution = currentSolution.slice(1, -1);
@@ -526,6 +533,7 @@
 
         while (true) {
             let digits = [Math.floor(Math.random()*10), Math.floor(Math.random()*10), Math.floor(Math.random()*10), Math.floor(Math.random()*10)];
+            currentSolution = "";
             if (solve24([...digits], digits.map(d=>d.toString()))) {
                 if (currentSolution.startsWith('(') && currentSolution.endsWith(')')) currentSolution = currentSolution.slice(1, -1);
                 targetDigits = [...digits];
