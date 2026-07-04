@@ -16,32 +16,45 @@
         body {
             background-color: #f0f2f5;
             margin: 0;
-            padding: 10px;
+            padding: 15px;
             display: flex;
-            justify-content: center;
+            flex-direction: column;
             align-items: center;
             min-height: 100vh;
+            width: 100vw;
         }
-        .container {
+        
+        /* Global App Title Header */
+        .app-main-header {
+            text-align: center;
+            font-size: 2.2rem;
+            font-weight: 800;
+            color: #7b1fa2;
+            margin: 10px 0 20px 0;
+            letter-spacing: 0.5px;
+        }
+
+        /* Fluid layout base directly using the screen real estate */
+        .app-workspace {
             width: 100%;
-            max-width: 1024px;
-            background: white;
-            border-radius: 16px;
-            box-shadow: 0 4px 25px rgba(0,0,0,0.08);
-            padding: 20px;
-            overflow: hidden;
+            max-width: 1100px;
         }
+
         .screen { display: none; }
         .screen.active { display: block; }
 
-        /* Setup Setup/Lobby Windows centered */
+        /* Setup Windows centered */
         .centered-panel {
             max-width: 400px;
             margin: 40px auto;
             text-align: center;
+            background: white;
+            padding: 30px;
+            border-radius: 16px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.05);
         }
 
-        h1 { margin: 0 0 10px 0; color: #333; font-size: 1.8rem; }
+        h1 { margin: 0 0 10px 0; color: #333; font-size: 1.6rem; }
         p { color: #666; font-size: 0.95rem; margin-bottom: 20px; }
         
         input[type="text"] {
@@ -84,71 +97,80 @@
         /* Column 1: Scoreboard Left */
         .side-scores {
             flex: 1;
-            max-width: 200px;
-            background: #f8f9fa;
-            border: 1px solid #e9ecef;
+            max-width: 220px;
+            background: white;
+            border: 1px solid #dee2e6;
             border-radius: 12px;
-            padding: 12px;
+            padding: 15px;
             display: flex;
             flex-direction: column;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.02);
         }
-        .side-scores h3 { margin: 0 0 10px 0; font-size: 1rem; color: #495057; border-bottom: 2px solid #dee2e6; padding-bottom: 5px; }
+        .side-scores h3 { margin: 0 0 12px 0; font-size: 1.05rem; color: #495057; border-bottom: 2px solid #edf2f7; padding-bottom: 8px; }
         .score-list { list-style: none; padding: 0; margin: 0; font-size: 0.95rem; }
         .score-item {
             display: flex;
             justify-content: space-between;
-            padding: 6px 8px;
+            padding: 8px 10px;
             border-radius: 6px;
-            margin-bottom: 4px;
-            background: white;
+            margin-bottom: 5px;
+            background: #f8f9fa;
             border: 1px solid #edf2f7;
         }
-        .score-item.me { background: #e3f2fd; border-color: #90caf9; font-weight: bold; }
+        .score-item.me { background: #e3f2fd; border-color: #90caf9; font-weight: bold; color: #0d47a1; }
 
         /* Column 2: Main Play Area Center */
         .center-board {
             flex: 2;
+            background: white;
+            border: 1px solid #dee2e6;
+            border-radius: 12px;
+            padding: 20px;
             display: flex;
             flex-direction: column;
             justify-content: space-between;
             text-align: center;
-            min-width: 280px;
+            min-width: 300px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.02);
         }
         .timer { font-size: 1.8rem; font-weight: bold; color: #d32f2f; margin-bottom: 5px; }
         
         .num-container { display: flex; justify-content: center; gap: 10px; margin: 15px 0; }
-        .num-box { background: #f3e5f5; color: #7b1fa2; font-size: 2.2rem; font-weight: bold; width: 65px; height: 65px; line-height: 61px; border-radius: 12px; border: 2px solid #e1bee7; }
+        .num-box { background: #f3e5f5; color: #7b1fa2; font-size: 2.2rem; font-weight: bold; width: 65px; height: 65px; line-height: 61px; border-radius: 12px; border: 2px solid #e1bee7; cursor: pointer; }
 
         /* Column 3: Number Pad Right */
         .side-pad {
             flex: 1.2;
-            max-width: 240px;
+            max-width: 260px;
             display: grid;
             grid-template-columns: repeat(4, 1fr);
             gap: 6px;
-            background: #f8f9fa;
-            padding: 10px;
+            background: white;
+            padding: 15px;
             border-radius: 12px;
-            border: 1px solid #e9ecef;
+            border: 1px solid #dee2e6;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.02);
         }
         .pad-btn {
             width: 100%;
-            height: 50px;
+            height: 52px;
             margin: 0;
             padding: 0;
             font-size: 1.25rem;
-            background-color: #ffffff;
+            background-color: #f8f9fa;
             color: #333;
-            border: 1px solid #ccc;
+            border: 1px solid #e2e8f0;
             border-radius: 8px;
             display: flex;
             align-items: center;
             justify-content: center;
+            cursor: pointer;
+            font-weight: 500;
         }
-        .pad-btn:active { background-color: #e2e8f0; }
-        .pad-btn.op { background-color: #fff9db; color: #f59f00; border-color: #ffe066; font-weight: bold; }
-        .pad-btn.action { background-color: #e8f5e9; color: #2e7d32; border-color: #c8e6c9; font-size: 0.95rem; }
-        .pad-btn.clear { background-color: #ffebee; color: #c62828; border-color: #ffcdd2; font-size: 0.95rem; }
+        .pad-btn:active { background-color: #cbd5e1; }
+        .pad-btn.op { background-color: #fff9db; color: #f59f00; border-color: #ffe066; font-weight: bold; font-size: 1.4rem; }
+        .pad-btn.action { background-color: #e8f5e9; color: #2e7d32; border-color: #c8e6c9; font-size: 0.95rem; font-weight: bold; }
+        .pad-btn.clear { background-color: #ffebee; color: #c62828; border-color: #ffcdd2; font-size: 0.95rem; font-weight: bold; }
 
         /* General UI Elements */
         .feedback { font-weight: bold; margin: 10px 0; font-size: 1.1rem; min-height: 26px; }
@@ -157,26 +179,29 @@
         .btn-group button { margin: 0; }
         .profile-badge { font-size: 0.85rem; background: #e0f7fa; color: #006064; padding: 4px 12px; border-radius: 20px; display: inline-block; margin-bottom: 15px; font-weight: 500; }
 
-        /* Responsive Flow For True Portrait Smartphones */
+        /* Responsive Flow For Phones */
         @media (max-width: 768px) {
-            body { padding: 5px; }
-            .container { padding: 12px; }
+            body { padding: 8px; }
+            .app-main-header { font-size: 1.8rem; margin: 5px 0 15px 0; }
             .game-layout { flex-direction: column; }
             .side-scores { max-width: 100%; order: 1; }
             .center-board { order: 2; }
-            .side-pad { max-width: 100%; order: 3; grid-template-columns: repeat(4, 1fr); }
+            .side-pad { max-width: 100%; order: 3; }
             .num-box { width: 55px; height: 55px; line-height: 51px; font-size: 1.8rem; }
         }
     </style>
 </head>
 <body>
 
-<div class="container">
+<!-- GLOBAL TOP HEADER TITLE -->
+<div class="app-main-header">24 Game</div>
+
+<div class="app-workspace">
     <!-- SCREEN 0: REGISTRATION -->
     <div id="register-screen" class="screen active">
         <div class="centered-panel">
             <h1>Player Profile</h1>
-            <p>Enter your profile configuration name</p>
+            <p>Enter your profile name</p>
             <input type="text" id="username-input" placeholder="Enter Nickname/Name">
             <button class="success" onclick="saveProfile()">Save & Continue</button>
         </div>
@@ -186,8 +211,8 @@
     <div id="menu-screen" class="screen">
         <div class="centered-panel">
             <div class="profile-badge" id="player-tag">Player:</div>
-            <h1>Make 24 Online</h1>
-            <p>Select your gameplay option</p>
+            <h1>Game Navigation</h1>
+            <p>Select your game mode</p>
             <button onclick="startSoloGame()">Solo Mode</button>
             <button class="secondary" onclick="showLobbyMenu()">Multiplayer Room</button>
             <button style="background:transparent; color:#777; font-size:0.85rem; text-decoration:underline;" onclick="editProfile()">Change Name</button>
@@ -198,7 +223,7 @@
     <div id="lobby-screen" class="screen">
         <div class="centered-panel">
             <h1>Multiplayer Lobby</h1>
-            <p>Initialize or step into a room environment</p>
+            <p>Create or join a room</p>
             <button onclick="createRoom()">+ Create New Room</button>
             <div style="margin: 15px 0; font-weight: bold; color: #888;">OR</div>
             <input type="text" id="room-id-input" placeholder="4-Digit Room Code" pattern="\d*" inputmode="numeric">
@@ -235,7 +260,7 @@
                 </div>
 
                 <div class="input-section">
-                    <input type="text" id="user-input" placeholder="Tap panel or input layout" readonly>
+                    <input type="text" id="user-input" placeholder="Tap pad below to solve" readonly>
                     <div class="feedback" id="feedback-msg"></div>
                     <div class="answer-box" id="answer">
                         Solution: <span id="solution-text"></span>
@@ -250,7 +275,7 @@
                 <button class="secondary" style="font-size:0.9rem; padding:10px;" onclick="leaveGame()">Exit to Menu</button>
             </div>
 
-            <!-- RIGHT: KEYPAD COLUMN -->
+            <!-- RIGHT: REARRANGED SEQUENTIAL KEYPAD COLUMN -->
             <div class="side-pad">
                 <button class="pad-btn op" onclick="appendPad('+')">+</button>
                 <button class="pad-btn op" onclick="appendPad('-')">-</button>
@@ -267,10 +292,10 @@
                 <button class="pad-btn" onclick="appendPad('5')">5</button>
                 <button class="pad-btn" onclick="appendPad('6')">6</button>
                 
+                <button class="pad-btn" onclick="appendPad('0')">0</button>
                 <button class="pad-btn" onclick="appendPad('1')">1</button>
                 <button class="pad-btn" onclick="appendPad('2')">2</button>
                 <button class="pad-btn" onclick="appendPad('3')">3</button>
-                <button class="pad-btn" onclick="appendPad('0')">0</button>
 
                 <button class="pad-btn clear" style="grid-column: span 2;" onclick="clearPad()">Clear</button>
                 <button class="pad-btn action" style="grid-column: span 2;" onclick="checkUserAnswer()">Submit</button>
@@ -281,7 +306,7 @@
 </div>
 
 <script>
-    // --- FIREBASE CREDENTIALS ---
+    // --- FIREBASE CONFIG ---
     const firebaseConfig = {
         apiKey: "AIzaSyBSpKz3tFMv0SyPGYdSaf-lYTYgzuP3CHw",
         authDomain: "make-24-game.firebaseapp.com",
@@ -299,7 +324,7 @@
         db = firebase.database();
     }
 
-    // --- STATE PROFILES ---
+    // --- GAME ENGINE STATE ---
     let currentSolution = "";
     let targetDigits = [];
     let timerInterval = null;
@@ -327,7 +352,7 @@
 
     function saveProfile() {
         const inputName = document.getElementById('username-input').value.trim();
-        if (!inputName) return alert("Invalid Profile Entry Name");
+        if (!inputName) return alert("Please enter a valid nickname.");
         myPlayerName = inputName;
         localStorage.setItem('make24_username', myPlayerName);
         document.getElementById('player-tag').innerText = `👤 Player: ${myPlayerName}`;
@@ -339,7 +364,6 @@
         showScreen('register-screen');
     }
 
-    // --- INTERFACES: ON-SCREEN PAD INPUT HANDLERS ---
     function appendPad(val) {
         document.getElementById('user-input').value += val;
     }
@@ -347,7 +371,7 @@
         document.getElementById('user-input').value = "";
     }
 
-    // --- MATRIX: SOLVER MATH SYSTEM ---
+    // --- LOGIC: SOLVER MATRIX ---
     function solve24(numbers, expressions) {
         if (numbers.length === 1) return Math.abs(numbers[0] - 24) < 0.001;
         for (let i = 0; i < numbers.length; i++) {
@@ -383,7 +407,6 @@
         return false;
     }
 
-    // --- GAME ENGINE FLOW SYSTEM ---
     function renderScores() {
         const listContainer = document.getElementById('score-display-list');
         listContainer.innerHTML = "";
@@ -400,7 +423,7 @@
     function startSoloGame() {
         isMultiplayer = false;
         soloScore = 0;
-        document.getElementById('game-title').innerText = "Solo Core System";
+        document.getElementById('game-title').innerText = "Solo Mode";
         document.getElementById('room-display').innerText = "";
         document.getElementById('next-btn').style.display = 'inline-block';
         showScreen('game-screen');
@@ -409,7 +432,7 @@
     }
 
     function showLobbyMenu() {
-        if (!db) return alert("Database missing instance linking.");
+        if (!db) return alert("Firebase setup incomplete.");
         showScreen('lobby-screen');
     }
 
@@ -423,7 +446,7 @@
             if (timeRemaining <= 0) {
                 clearInterval(timerInterval);
                 document.getElementById('feedback-msg').style.color = '#d32f2f';
-                document.getElementById('feedback-msg').innerText = "Match Timed Out!";
+                document.getElementById('feedback-msg').innerText = "Out of time!";
             }
         }, 1000);
     }
@@ -477,10 +500,10 @@
         const userDigits = inputRaw.match(/\d/g);
 
         if (!userDigits || userDigits.length !== 4) {
-            feedback.style.color = '#d32f2f'; feedback.innerText = "Error: Input exactly 4 digits."; return;
+            feedback.style.color = '#d32f2f'; feedback.innerText = "Error: Must use exactly 4 digits."; return;
         }
         if ([...targetDigits].sort().join('') !== [...userDigits].map(Number).sort().join('')) {
-            feedback.style.color = '#d32f2f'; feedback.innerText = "Error: Mismatched components."; return;
+            feedback.style.color = '#d32f2f'; feedback.innerText = "Error: Digits do not match puzzle."; return;
         }
 
         let jsEvalString = inputRaw.replace(/×/g, '*').replace(/÷/g, '/');
@@ -488,14 +511,13 @@
             let result = Function(`"use strict"; return (${jsEvalString})`)();
             if (Math.abs(result - 24) < 0.001) {
                 if (isMultiplayer) {
-                    // Update scores array safely inside transaction framework
                     db.ref('rooms/' + currentRoomId + '/scores/' + myPlayerName).transaction((currentScore) => {
                         return (currentScore || 0) + 1;
                     });
                     db.ref('rooms/' + currentRoomId).update({ winner: myPlayerName });
                 } else {
                     feedback.style.color = '#2e7d32';
-                    feedback.innerText = "Correct! Match Won! 🎉";
+                    feedback.innerText = "Correct! 🎉";
                     soloScore++;
                     renderScores();
                     clearInterval(timerInterval);
@@ -505,7 +527,7 @@
                 feedback.style.color = '#d32f2f'; feedback.innerText = `Equals ${result}, not 24.`;
             }
         } catch (e) {
-            feedback.style.color = '#d32f2f'; feedback.innerText = "Syntax evaluation error.";
+            feedback.style.color = '#d32f2f'; feedback.innerText = "Evaluation error. Check brackets.";
         }
     }
 
@@ -517,12 +539,12 @@
         
         let refreshSecs = 10;
         const countdownDisplay = document.getElementById('refresh-countdown');
-        countdownDisplay.innerText = `Refreshing board in ${refreshSecs}s...`;
+        countdownDisplay.innerText = `Refreshing puzzle in ${refreshSecs}s...`;
         
         clearInterval(refreshInterval);
         refreshInterval = setInterval(() => {
             refreshSecs--;
-            countdownDisplay.innerText = `Refreshing board in ${refreshSecs}s...`;
+            countdownDisplay.innerText = `Refreshing puzzle in ${refreshSecs}s...`;
             if (refreshSecs <= 0) {
                 clearInterval(refreshInterval);
                 getSolvableCombination();
@@ -530,7 +552,7 @@
         }, 1000);
     }
 
-    // --- MULTIPLAYER CORE MATRIX CONNECTS ---
+    // --- MULTIPLAYER OVERLAY ---
     function createRoom() {
         currentRoomId = Math.floor(1000 + Math.random() * 9000).toString(); 
         isMultiplayer = true;
@@ -562,18 +584,16 @@
             if (snapshot.exists()) {
                 currentRoomId = inputCode;
                 isMultiplayer = true;
-                
-                // Add self to the room scores register safely
                 db.ref('rooms/' + currentRoomId + '/scores/' + myPlayerName).set(0);
                 
                 listenToRoom();
-                document.getElementById('game-title').innerText = "Multiplayer Match";
+                document.getElementById('game-title').innerText = "Multiplayer Race";
                 document.getElementById('room-display').innerText = `Room Code: ${currentRoomId} (Guest)`;
                 document.getElementById('next-btn').style.display = 'none'; 
                 document.getElementById('reveal-btn').style.display = 'none';
                 showScreen('game-screen');
             } else {
-                alert("Target active matching node environment array mismatch.");
+                alert("Room not found.");
             }
         });
     }
@@ -599,14 +619,14 @@
                 const feedback = document.getElementById('feedback-msg');
                 if (data.winner === myPlayerName) {
                     feedback.style.color = '#2e7d32';
-                    feedback.innerText = "You Won this Match! 🏆";
+                    feedback.innerText = "You Won! 🏆";
                 } else {
                     feedback.style.color = '#d32f2f';
                     feedback.innerText = `Winner: ${data.winner}`;
                 }
                 document.getElementById('answer').style.display = 'block';
                 document.getElementById('solution-text').innerText = currentSolution + " = 24";
-                document.getElementById('refresh-countdown').innerText = "Waiting for host step action...";
+                document.getElementById('refresh-countdown').innerText = "Waiting for host to cycle card...";
             }
         });
     }
