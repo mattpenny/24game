@@ -187,13 +187,13 @@
         .btn-group button { margin: 0; }
         .profile-badge { font-size: 0.95rem; background: #e0f7fa; color: #006064; padding: 6px 16px; border-radius: 20px; display: inline-block; margin-bottom: 15px; font-weight: bold; border: 2px solid #b2ebf2; }
 
-        /* Column 3: Number Pad Right */
+        /* Column 3: Custom Signs & Actions Pad Right */
         .side-pad {
             flex: 1.2;
             max-width: 280px;
             display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 8px;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
             background: white;
             padding: 15px;
             border-radius: 24px;
@@ -202,14 +202,14 @@
         }
         .pad-btn {
             width: 100%;
-            height: 54px;
+            height: 58px;
             margin: 0;
             padding: 0;
-            font-size: 1.4rem;
+            font-size: 1.5rem;
             background-color: #f1f5f9;
             color: #334155;
             border: none;
-            border-radius: 12px;
+            border-radius: 14px;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -222,15 +222,18 @@
             transform: translateY(3px);
             box-shadow: 0 1px 0px #cbd5e1;
         }
-        /* Operator Blue/Orange Blocks */
-        .pad-btn.op { background-color: #e0f2fe; color: #0284c7; box-shadow: 0 4px 0px #bae6fd; font-size: 1.6rem; }
+        /* Operator Blue Blocks */
+        .pad-btn.op { background-color: #e0f2fe; color: #0284c7; box-shadow: 0 4px 0px #bae6fd; font-size: 1.8rem; }
         .pad-btn.op:active { box-shadow: 0 1px 0px #bae6fd; }
         
-        .pad-btn.action { background-color: #4caf50; color: white; box-shadow: 0 4px 0px #1b5e20; font-size: 1.1rem; }
-        .pad-btn.action:active { box-shadow: 0 1px 0px #1b5e20; }
-        
+        .pad-btn.backspace { background-color: #ffe0b2; color: #e65100; box-shadow: 0 4px 0px #ffb74d; font-size: 1.1rem; }
+        .pad-btn.backspace:active { box-shadow: 0 1px 0px #ffb74d; }
+
         .pad-btn.clear { background-color: #f44336; color: white; box-shadow: 0 4px 0px #b71c1c; font-size: 1.1rem; }
         .pad-btn.clear:active { box-shadow: 0 1px 0px #b71c1c; }
+
+        .pad-btn.action { background-color: #4caf50; color: white; box-shadow: 0 4px 0px #1b5e20; font-size: 1.2rem; grid-column: span 2; margin-top: 4px; }
+        .pad-btn.action:active { box-shadow: 0 1px 0px #1b5e20; }
 
         /* Responsive Flow For Phones */
         @media (max-width: 768px) {
@@ -239,12 +242,13 @@
             .game-layout { flex-direction: column; }
             .side-scores { max-width: 100%; order: 1; box-shadow: 0 4px 0px #81c784; }
             .center-board { order: 2; box-shadow: 0 5px 0px #b3e5fc; }
-            .side-pad { max-width: 100%; order: 3; box-shadow: 0 5px 0px #ffcc80; }
+            .side-pad { max-width: 100%; order: 3; box-shadow: 0 5px 0px #ffcc80; grid-template-columns: repeat(4, 1fr); }
+            .pad-btn.action { grid-column: span 4; }
             .num-box { width: 60px; height: 60px; line-height: 52px; font-size: 2.2rem; }
         }
     </style>
     <!-- Include Google Font for beautiful rounded text -->
-    <link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@700;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght=700;900&display=swap" rel="stylesheet">
 </head>
 <body>
 
@@ -330,30 +334,21 @@
                 <button class="secondary" style="font-size:0.95rem; padding:10px; background-color:#757575; box-shadow:0 4px 0 #424242;" onclick="leaveGame()">Exit to Menu</button>
             </div>
 
-            <!-- RIGHT: REARRANGED SEQUENTIAL KEYPAD COLUMN -->
+            <!-- RIGHT: REARRANGED SIGNS & CONTROLS ONLY -->
             <div class="side-pad">
                 <button class="pad-btn op" onclick="appendPad('+')">+</button>
                 <button class="pad-btn op" onclick="appendPad('-')">-</button>
+                
                 <button class="pad-btn op" onclick="appendPad('×')">×</button>
                 <button class="pad-btn op" onclick="appendPad('÷')">÷</button>
                 
                 <button class="pad-btn op" onclick="appendPad('(')">(</button>
                 <button class="pad-btn op" onclick="appendPad(')')">)</button>
-                <button class="pad-btn" onclick="appendPad('7')">7</button>
-                <button class="pad-btn" onclick="appendPad('8')">8</button>
-                
-                <button class="pad-btn" onclick="appendPad('9')">9</button>
-                <button class="pad-btn" onclick="appendPad('4')">4</button>
-                <button class="pad-btn" onclick="appendPad('5')">5</button>
-                <button class="pad-btn" onclick="appendPad('6')">6</button>
-                
-                <button class="pad-btn" onclick="appendPad('0')">0</button>
-                <button class="pad-btn" onclick="appendPad('1')">1</button>
-                <button class="pad-btn" onclick="appendPad('2')">2</button>
-                <button class="pad-btn" onclick="appendPad('3')">3</button>
 
-                <button class="pad-btn clear" style="grid-column: span 2;" onclick="clearPad()">Clear ❌</button>
-                <button class="pad-btn action" style="grid-column: span 2;" onclick="checkUserAnswer()">Submit ⭐</button>
+                <button class="pad-btn backspace" onclick="backspacePad()">Undo ⌫</button>
+                <button class="pad-btn clear" onclick="clearPad()">Clear ❌</button>
+                
+                <button class="pad-btn action" onclick="checkUserAnswer()">Submit ⭐</button>
             </div>
 
         </div>
@@ -424,6 +419,10 @@
     }
     function clearPad() {
         document.getElementById('user-input').value = "";
+    }
+    function backspacePad() {
+        const inputField = document.getElementById('user-input');
+        inputField.value = inputField.value.slice(0, -1);
     }
 
     // --- LOGIC: SOLVER MATRIX ---
