@@ -282,12 +282,14 @@
     <div id="lobby-screen" class="screen">
         <div class="centered-panel">
             <h1>Game Lobby</h1>
-            <p>Create or find a room code</p>
-            <button onclick="createRoom()">+ Make a New Room</button>
-            <div style="margin: 15px 0; font-weight: 900; color: #9c27b0; font-size:1.2rem;">- OR -</div>
-            <input type="text" id="room-id-input" placeholder="Enter 4-Digit Code" pattern="\d*" inputmode="numeric">
-            <button class="success" onclick="joinRoom()">Join Friend's Room</button>
-            <button class="secondary" style="margin-top: 15px;" onclick="showScreen('menu-screen')">Go Back</button>
+            <p>Play with world strangers or friends</p>
+            <button class="success" style="background-color: #e91e63; box-shadow: 0 5px 0px #c2185b;" onclick="joinRandomRoom()">🎲 Join Random Match</button>
+            <div style="margin: 10px 0; font-weight: 900; color: #9c27b0; font-size:1rem;">- OR -</div>
+            <button onclick="createRoom()">+ Make Private Room</button>
+            <div style="margin: 10px 0; font-weight: 900; color: #9c27b0; font-size:1rem;">- OR -</div>
+            <input type="text" id="room-id-input" placeholder="Enter Friend's 4-Digit Code" pattern="\d*" inputmode="numeric">
+            <button class="secondary" onclick="joinRoom()">Join Private Room</button>
+            <button class="secondary" style="margin-top: 15px; background-color: #757575; box-shadow:0 4px 0 #424242;" onclick="showScreen('menu-screen')">Go Back</button>
         </div>
     </div>
 
@@ -381,6 +383,7 @@
     let refreshInterval = null;
     let timeRemaining = 300; 
     let isMultiplayer = false;
+    let isHost = false;
     let currentRoomId = null;
     let myPlayerName = "";
     let soloScore = 0;
@@ -482,6 +485,7 @@
 
     function startSoloGame() {
         isMultiplayer = false;
+        isHost = false;
         soloScore = 0;
         document.getElementById('game-title').innerText = "Solo Mode 🌟";
         document.getElementById('room-display').innerText = "";
@@ -520,6 +524,7 @@
     function getSolvableCombination() {
         clearInterval(refreshInterval);
         if (isMultiplayer) {
+            if (!isHost) return; // Only host generates cards for the room
             let digits = [];
             while (true) {
                 digits = [Math.floor(Math.random()*10), Math.floor(Math.random()*10), Math.floor(Math.random()*10), Math.floor(Math.random()*10)];
@@ -614,22 +619,23 @@
         }, 1000);
     }
 
-    // --- MULTIPLAYER OVERLAY ---
+    // --- MULTIPLAYER LOBBY CODES ---
     function createRoom() {
         currentRoomId = Math.floor(1000 + Math.random() * 9000).toString(); 
         isMultiplayer = true;
+        isHost = true;
         multiplayerScores = {};
         multiplayerScores[myPlayerName] = 0;
 
         db.ref('rooms/' + currentRoomId).set({
-            status: "lobby",
+            status: "private",
             digits: [0,0,0,0],
             solution: "",
             winner: null,
             scores: multiplayerScores
         }).then(() => {
             listenToRoom();
-            document.getElementById('game-title').innerText = "Multiplayer Arena 🚀";
+            document.getElementById('game-title').innerText = "Private Arena 🔒";
             document.getElementById('room-display').innerText = `Room Code: ${currentRoomId} (Host)`;
             document.getElementById('next-btn').style.display = 'inline-block';
             document.getElementById('reveal-btn').style.display = 'none'; 
@@ -646,16 +652,76 @@
             if (snapshot.exists()) {
                 currentRoomId = inputCode;
                 isMultiplayer = true;
+                isHost = false;
                 db.ref('rooms/' + currentRoomId + '/scores/' + myPlayerName).set(0);
                 
                 listenToRoom();
                 document.getElementById('game-title').innerText = "Multiplayer Race 🏁";
-                document.getElementById('room-display').innerText = `Room Code: ${currentRoomId} (Guest)`;
+                document.getElementById('room-display').innerText = `Room Code: ${currentRoomId}`;
                 document.getElementById('next-btn').style.display = 'none'; 
                 document.getElementById('reveal-btn').style.display = 'none';
                 showScreen('game-screen');
             } else {
                 alert("Room not found! Double check the numbers.");
+            }
+        });
+    }
+
+    // --- AUTOMATIC MATCHMAKING FOR RANDOM PLAYS ---
+    function joinRandomRoom() {
+        if (!db) return;
+        document.getElementById('feedback-msg').innerText = "Searching for random active match...";
+        
+        db.ref('rooms').once('value', snapshot => {
+            let rooms = snapshot.val() || {};
+            let foundRoomId = null;
+
+            // Find an open room marked as "waiting"
+            for (let id in rooms) {
+                if (rooms[id].status === "waiting") {
+                    foundRoomId = id;
+                    break;
+                }
+            }
+
+            if (foundRoomId) {
+                // Join existing match
+                currentRoomId = foundRoomId;
+                isMultiplayer = true;
+                isHost = false;
+                
+                db.ref('rooms/' + currentRoomId + '/scores/' + myPlayerName).set(0);
+                db.ref('rooms/' + currentRoomId).update({ status: "playing" });
+
+                listenToRoom();
+                document.getElementById('game-title').innerText = "Random Match 🎲";
+                document.getElementById('room-display').innerText = "Playing with a Stranger";
+                document.getElementById('next-btn').style.display = 'none';
+                document.getElementById('reveal-btn').style.display = 'none';
+                showScreen('game-screen');
+            } else {
+                // No open rooms, establish a new waiting matchmaking room
+                currentRoomId = Math.floor(1000 + Math.random() * 9000).toString();
+                isMultiplayer = true;
+                isHost = true;
+                multiplayerScores = {};
+                multiplayerScores[myPlayerName] = 0;
+
+                db.ref('rooms/' + currentRoomId).set({
+                    status: "waiting",
+                    digits: [0,0,0,0],
+                    solution: "",
+                    winner: null,
+                    scores: multiplayerScores
+                }).then(() => {
+                    listenToRoom();
+                    document.getElementById('game-title').innerText = "Random Match 🎲";
+                    document.getElementById('room-display').innerText = "Waiting for an opponent to connect...";
+                    document.getElementById('next-btn').style.display = 'inline-block';
+                    document.getElementById('reveal-btn').style.display = 'none';
+                    showScreen('game-screen');
+                    getSolvableCombination();
+                });
             }
         });
     }
@@ -672,8 +738,14 @@
                 renderScores();
             }
 
-            if (document.getElementById('n1').innerText !== String(targetDigits[0])) {
+            // Update board digits dynamically if data shifted
+            if (targetDigits && targetDigits[0] !== 0 && document.getElementById('n1').innerText !== String(targetDigits[0])) {
                 setupBoardUI(targetDigits);
+            }
+
+            // If a partner jumps into a waiting lobby match
+            if (data.status === "playing" && document.getElementById('room-display').innerText.includes("Waiting")) {
+                document.getElementById('room-display').innerText = "Opponent matched! Go!";
             }
 
             if (data.winner) {
@@ -682,13 +754,19 @@
                 if (data.winner === myPlayerName) {
                     feedback.style.color = '#2e7d32';
                     feedback.innerText = "You Won! 🏆 You got the star!";
+                    if (isHost) setTimeout(getSolvableCombination, 2500);
                 } else {
                     feedback.style.color = '#d32f2f';
                     feedback.innerText = `${data.winner} solved it first!`;
                 }
                 document.getElementById('answer').style.display = 'block';
                 document.getElementById('solution-text').innerText = currentSolution + " = 24";
-                document.getElementById('refresh-countdown').innerText = "Waiting for Host to deal a new card...";
+                
+                if (isHost) {
+                    document.getElementById('refresh-countdown').innerText = "Dealing next puzzle card shortly...";
+                } else {
+                    document.getElementById('refresh-countdown').innerText = "Waiting for Host to deal a new card...";
+                }
             }
         });
     }
@@ -697,6 +775,10 @@
         clearInterval(timerInterval);
         clearInterval(refreshInterval);
         if (isMultiplayer && currentRoomId) {
+            // Remove room entirely if the host leaves a waiting lobby queue
+            if (isHost) {
+                db.ref('rooms/' + currentRoomId).remove();
+            }
             db.ref('rooms/' + currentRoomId).off();
         }
         showScreen('menu-screen');
