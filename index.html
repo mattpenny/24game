@@ -571,6 +571,7 @@
     }
 
     function setupBoardUI(digits) {
+        if (!digits || digits[0] === 0) return;
         document.getElementById('n1').innerText = digits[0];
         document.getElementById('n2').innerText = digits[1];
         document.getElementById('n3').innerText = digits[2];
@@ -591,7 +592,7 @@
         if (!userDigits || userDigits.length !== 4) {
             feedback.style.color = '#e53935'; feedback.innerText = "Oops! You must use all 4 numbers."; return;
         }
-        if ([...targetDigits].sort().join('') !== [...userDigits].map(Number).sort().join('')) {
+        if (!targetDigits || [...targetDigits].sort().join('') !== [...userDigits].map(Number).sort().join('')) {
             feedback.style.color = '#e53935'; feedback.innerText = "Check again! Use only the given numbers."; return;
         }
 
@@ -675,7 +676,15 @@
         db.ref('rooms/' + inputCode).once('value', snapshot => {
             if (snapshot.exists()) {
                 const roomData = snapshot.val();
-                let playerCount = Object.keys(roomData.scores || {}).length;
+                let existingScores = roomData.scores || {};
+                
+                // CRITICAL FIX: Block identical names
+                if (existingScores[myPlayerName] !== undefined) {
+                    alert(`Someone named "${myPlayerName}" is already inside this room! Please change your name from the main menu.`);
+                    return;
+                }
+
+                let playerCount = Object.keys(existingScores).length;
                 if (playerCount >= 6) { return alert("Room is fully packed! Max 6 players."); }
 
                 currentRoomId = inputCode;
@@ -706,10 +715,15 @@
             let foundRoomId = null;
 
             for (let id in rooms) {
-                let pCount = Object.keys(rooms[id].scores || {}).length;
+                let existingScores = rooms[id].scores || {};
+                let pCount = Object.keys(existingScores).length;
+                
+                // Filter open matches and check duplicate name criteria
                 if ((rooms[id].status === "waiting" || rooms[id].status === "open") && pCount < 6) {
-                    foundRoomId = id;
-                    break;
+                    if (existingScores[myPlayerName] === undefined) {
+                        foundRoomId = id;
+                        break;
+                    }
                 }
             }
 
@@ -763,7 +777,7 @@
 
             let activePlayersCount = Object.keys(multiplayerScores).length;
 
-            if (data.status === "waiting" || (data.status === "private" && data.digits[0] === 0)) {
+            if (data.status === "waiting" || (data.status === "private" && (!data.digits || data.digits[0] === 0))) {
                 showScreen('waiting-screen');
                 if (data.status === "private") {
                     document.getElementById('waiting-status-title').innerText = "Private Lobby Room";
