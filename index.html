@@ -106,7 +106,7 @@
 
         .side-scores {
             flex: 1;
-            max-width: 220px;
+            max-width: 240px;
             background: white;
             border: 4px solid #81c784;
             border-radius: 20px;
@@ -226,7 +226,6 @@
         .pad-btn.action { background-color: #4caf50; color: white; box-shadow: 0 4px 0px #1b5e20; font-size: 1.2rem; grid-column: span 2; margin-top: 4px; }
         .pad-btn.action:active { box-shadow: 0 1px 0px #1b5e20; }
 
-        /* Spinner for waiting room */
         .spinner {
             border: 6px solid #f3f3f3;
             border-top: 6px solid #e91e63;
@@ -236,10 +235,7 @@
             animation: spin 1s linear infinite;
             margin: 20px auto;
         }
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 
         @media (max-width: 768px) {
             body { padding: 10px; }
@@ -285,7 +281,7 @@
     <div id="lobby-screen" class="screen">
         <div class="centered-panel">
             <h1>Game Lobby</h1>
-            <p>Play with world strangers or friends</p>
+            <p>Play with up to 6 players per room!</p>
             <button class="success" style="background-color: #e91e63; box-shadow: 0 5px 0px #c2185b;" onclick="joinRandomRoom()">🎲 Join Random Match</button>
             <div style="margin: 10px 0; font-weight: 900; color: #9c27b0; font-size:1rem;">- OR -</div>
             <button onclick="createRoom()">+ Make Private Room</button>
@@ -296,12 +292,14 @@
         </div>
     </div>
 
-    <!-- SCREEN 2.5: MATCHMAKING WAITING SCREEN -->
+    <!-- SCREEN 2.5: MATCHMAKING LOBBY QUEUE -->
     <div id="waiting-screen" class="screen">
         <div class="centered-panel">
-            <h1 id="waiting-status-title">Looking for Player...</h1>
+            <h1 id="waiting-status-title">Gathering Players...</h1>
             <div class="spinner"></div>
-            <p id="waiting-status-desc">Waiting for an opponent to join the arena.</p>
+            <p id="waiting-status-desc">Looking for competitors...</p>
+            <div id="player-count-indicator" style="font-weight:900; color:#e91e63; margin-bottom:15px;">Players connected: 1/6</div>
+            <button id="force-start-btn" class="success" style="display:none; margin-bottom:10px;" onclick="forceStartMatch()">Start Match Now 🎮</button>
             <button class="secondary" style="background-color: #757575; box-shadow:0 4px 0 #424242;" onclick="leaveGame()">Cancel & Exit</button>
         </div>
     </div>
@@ -324,19 +322,26 @@
                     <div class="timer" id="timer-display">⏱️ 05:00</div>
                 </div>
 
-                <div class="num-container">
-                    <div class="num-box" id="n1" onclick="appendPad(this.innerText)">-</div>
-                    <div class="num-box" id="n2" onclick="appendPad(this.innerText)">-</div>
-                    <div class="num-box" id="n3" onclick="appendPad(this.innerText)">-</div>
-                    <div class="num-box" id="n4" onclick="appendPad(this.innerText)">-</div>
+                <!-- NEW DROP-IN INTERMISSION SHIELD PANEL -->
+                <div id="dropin-wait-msg" style="display:none; background:#ffffe0; border:3px dashed #ffb74d; padding:20px; border-radius:16px; font-weight:bold; color:#e65100; margin: 20px 0;">
+                    ⏳ Round in progress! <br><span style="font-size:0.9rem; color:#666;">You'll automatically join on the very next card.</span>
                 </div>
 
-                <div class="input-section">
-                    <input type="text" id="user-input" placeholder="Tap numbers & signs to make 24!" readonly>
-                    <div class="feedback" id="feedback-msg"></div>
-                    <div class="answer-box" id="answer">
-                        Solution: <span id="solution-text"></span>
-                        <div style="font-size:0.85rem; font-style:italic; margin-top:5px; font-weight:bold;" id="refresh-countdown"></div>
+                <div id="active-puzzle-ui">
+                    <div class="num-container">
+                        <div class="num-box" id="n1" onclick="appendPad(this.innerText)">-</div>
+                        <div class="num-box" id="n2" onclick="appendPad(this.innerText)">-</div>
+                        <div class="num-box" id="n3" onclick="appendPad(this.innerText)">-</div>
+                        <div class="num-box" id="n4" onclick="appendPad(this.innerText)">-</div>
+                    </div>
+
+                    <div class="input-section">
+                        <input type="text" id="user-input" placeholder="Tap numbers & signs to make 24!" readonly>
+                        <div class="feedback" id="feedback-msg"></div>
+                        <div class="answer-box" id="answer">
+                            Solution: <span id="solution-text"></span>
+                            <div style="font-size:0.85rem; font-style:italic; margin-top:5px; font-weight:bold;" id="refresh-countdown"></div>
+                        </div>
                     </div>
                 </div>
 
@@ -347,7 +352,7 @@
                 <button class="secondary" style="font-size:0.95rem; padding:10px; background-color:#757575; box-shadow:0 4px 0 #424242;" onclick="leaveGame()">Exit to Menu</button>
             </div>
 
-            <div class="side-pad">
+            <div class="side-pad" id="keyboard-pad-ui">
                 <button class="pad-btn op" onclick="appendPad('+')">+</button>
                 <button class="pad-btn op" onclick="appendPad('-')">-</button>
                 <button class="pad-btn op" onclick="appendPad('×')">×</button>
@@ -382,7 +387,7 @@
         db = firebase.database();
     }
 
-    // --- GAME ENGINE STATE ---
+    // --- STATE ENGINE ---
     let currentSolution = "";
     let targetDigits = [];
     let timerInterval = null;
@@ -394,6 +399,7 @@
     let myPlayerName = "";
     let soloScore = 0;
     let multiplayerScores = {};
+    let hasJoinedActiveRound = false;
 
     window.addEventListener('DOMContentLoaded', () => {
         const savedName = localStorage.getItem('make24_username');
@@ -424,6 +430,7 @@
     }
 
     function appendPad(val) {
+        if(!hasJoinedActiveRound && isMultiplayer) return;
         document.getElementById('user-input').value += val;
     }
     function clearPad() {
@@ -492,9 +499,12 @@
         isMultiplayer = false;
         isHost = false;
         soloScore = 0;
+        hasJoinedActiveRound = true;
         document.getElementById('game-title').innerText = "Solo Mode 🌟";
         document.getElementById('room-display').innerText = "";
         document.getElementById('next-btn').style.display = 'inline-block';
+        document.getElementById('active-puzzle-ui').style.display = 'block';
+        document.getElementById('dropin-wait-msg').style.display = 'none';
         showScreen('game-screen');
         renderScores();
         getSolvableCombination();
@@ -566,7 +576,7 @@
     }
 
     function checkUserAnswer() {
-        if (timeRemaining <= 0) return;
+        if (!hasJoinedActiveRound || timeRemaining <= 0) return;
         const feedback = document.getElementById('feedback-msg');
         const inputRaw = document.getElementById('user-input').value;
         const userDigits = inputRaw.match(/\d/g);
@@ -629,6 +639,7 @@
         currentRoomId = Math.floor(1000 + Math.random() * 9000).toString(); 
         isMultiplayer = true;
         isHost = true;
+        hasJoinedActiveRound = true;
         multiplayerScores = {};
         multiplayerScores[myPlayerName] = 0;
 
@@ -644,6 +655,8 @@
             document.getElementById('room-display').innerText = `Room Code: ${currentRoomId} (Host)`;
             document.getElementById('next-btn').style.display = 'inline-block';
             document.getElementById('reveal-btn').style.display = 'none'; 
+            document.getElementById('active-puzzle-ui').style.display = 'block';
+            document.getElementById('dropin-wait-msg').style.display = 'none';
             showScreen('game-screen');
             getSolvableCombination();
         });
@@ -655,11 +668,21 @@
         
         db.ref('rooms/' + inputCode).once('value', snapshot => {
             if (snapshot.exists()) {
+                const roomData = snapshot.val();
+                let playerCount = Object.keys(roomData.scores || {}).length;
+                if (playerCount >= 6) { return alert("Room is fully packed! Max 6 players."); }
+
                 currentRoomId = inputCode;
                 isMultiplayer = true;
                 isHost = false;
+                
+                // If data digits are active, lock out input initially until next card reset loop triggers
+                hasJoinedActiveRound = (roomData.digits && roomData.digits[0] === 0);
+
                 db.ref('rooms/' + currentRoomId + '/scores/' + myPlayerName).set(0);
-                db.ref('rooms/' + currentRoomId).update({ status: "playing" });
+                if (roomData.status === "waiting") {
+                    db.ref('rooms/' + currentRoomId).update({ status: "open" });
+                }
                 
                 listenToRoom();
                 document.getElementById('game-title').innerText = "Multiplayer Race 🏁";
@@ -673,7 +696,7 @@
         });
     }
 
-    // --- AUTOMATIC MATCHMAKING ---
+    // --- AUTOMATIC DYNAMIC MATCHMAKING (MAX 6) ---
     function joinRandomRoom() {
         if (!db) return;
         showScreen('waiting-screen');
@@ -682,8 +705,10 @@
             let rooms = snapshot.val() || {};
             let foundRoomId = null;
 
+            // Target rooms marked "waiting" or "open" that haven't hit the 6-player ceiling yet
             for (let id in rooms) {
-                if (rooms[id].status === "waiting") {
+                let pCount = Object.keys(rooms[id].scores || {}).length;
+                if ((rooms[id].status === "waiting" || rooms[id].status === "open") && pCount < 6) {
                     foundRoomId = id;
                     break;
                 }
@@ -694,19 +719,25 @@
                 isMultiplayer = true;
                 isHost = false;
                 
+                let activeRoom = rooms[foundRoomId];
+                // Check if they are dropping into an already active ongoing card problem
+                hasJoinedActiveRound = (activeRoom.digits && activeRoom.digits[0] === 0 || !activeRoom.winner);
+
                 db.ref('rooms/' + currentRoomId + '/scores/' + myPlayerName).set(0);
-                db.ref('rooms/' + currentRoomId).update({ status: "playing" });
+                db.ref('rooms/' + currentRoomId).update({ status: "open" });
 
                 listenToRoom();
                 document.getElementById('game-title').innerText = "Random Match 🎲";
-                document.getElementById('room-display').innerText = "Playing with a Stranger";
+                document.getElementById('room-display').innerText = "Playing Online Match";
                 document.getElementById('next-btn').style.display = 'none';
                 document.getElementById('reveal-btn').style.display = 'none';
                 showScreen('game-screen');
             } else {
+                // Initialize room set to "waiting"
                 currentRoomId = Math.floor(1000 + Math.random() * 9000).toString();
                 isMultiplayer = true;
                 isHost = true;
+                hasJoinedActiveRound = true;
                 multiplayerScores = {};
                 multiplayerScores[myPlayerName] = 0;
 
@@ -723,35 +754,71 @@
         });
     }
 
+    function forceStartMatch() {
+        if (!isHost) return;
+        db.ref('rooms/' + currentRoomId).update({ status: "open" }).then(() => {
+            getSolvableCombination();
+        });
+    }
+
     function listenToRoom() {
         db.ref('rooms/' + currentRoomId).on('value', snapshot => {
             const data = snapshot.val();
             if (!data) return;
 
-            // If room is just waiting, lock them on the matchmaking pending layout screen
-            if (data.status === "waiting") {
-                showScreen('waiting-screen');
-                document.getElementById('waiting-status-title').innerText = "Waiting for Opponent...";
-                document.getElementById('waiting-status-desc').innerText = `Room allocated: ${currentRoomId}. Sitting tight until someone joins!`;
-                return;
-            }
-
-            // Once it flips to "playing" or "private", route to the live game layout screen
-            if (document.getElementById('waiting-screen').classList.contains('active')) {
-                document.getElementById('game-title').innerText = "Random Match 🎲";
-                document.getElementById('room-display').innerText = "Opponent found! Race begins!";
-                document.getElementById('next-btn').style.display = isHost ? 'inline-block' : 'none';
-                document.getElementById('reveal-btn').style.display = 'none';
-                showScreen('game-screen');
-                if (isHost) getSolvableCombination();
-            }
-
-            targetDigits = data.digits;
-            currentSolution = data.solution;
             if (data.scores) {
                 multiplayerScores = data.scores;
                 renderScores();
             }
+
+            let activePlayersCount = Object.keys(multiplayerScores).length;
+
+            // Screen layout logic for the initial setup phase
+            if (data.status === "waiting") {
+                showScreen('waiting-screen');
+                document.getElementById('waiting-status-title').innerText = "Waiting for Opponent...";
+                document.getElementById('waiting-status-desc').innerText = `Room Code Allocated: ${currentRoomId}. Invite friends or wait for an online matchmaking match!`;
+                document.getElementById('player-count-indicator').innerText = `Players connected: ${activePlayersCount}/6`;
+                
+                // Allow premature starting as long as at least 2 players are present
+                if (isHost && activePlayersCount >= 2) {
+                    document.getElementById('force-start-btn').style.display = 'block';
+                } else {
+                    document.getElementById('force-start-btn').style.display = 'none';
+                }
+                return;
+            }
+
+            // Route out of lobby screen as soon as state shifts to open
+            if (document.getElementById('waiting-screen').classList.contains('active')) {
+                document.getElementById('game-title').innerText = "Multiplayer Arena 🏁";
+                document.getElementById('room-display').innerText = `Room Code: ${currentRoomId} (${activePlayersCount}/6 Players)`;
+                document.getElementById('next-btn').style.display = isHost ? 'inline-block' : 'none';
+                document.getElementById('reveal-btn').style.display = 'none';
+                showScreen('game-screen');
+                if (isHost && data.digits[0] === 0) getSolvableCombination();
+            }
+
+            document.getElementById('room-display').innerText = `Room Code: ${currentRoomId} (${activePlayersCount}/6 Players)`;
+
+            // MID-ROUND JOINING AND DROP-IN VALIDATION HOOK
+            if (data.winner) {
+                // When a winner is set, it means this cycle round is ending. Next card resets lock shield!
+                hasJoinedActiveRound = true; 
+            }
+
+            if (!hasJoinedActiveRound) {
+                document.getElementById('active-puzzle-ui').style.display = 'none';
+                document.getElementById('keyboard-pad-ui').style.opacity = '0.4';
+                document.getElementById('dropin-wait-msg').style.display = 'block';
+            } else {
+                document.getElementById('active-puzzle-ui').style.display = 'block';
+                document.getElementById('keyboard-pad-ui').style.opacity = '1';
+                document.getElementById('dropin-wait-msg').style.display = 'none';
+            }
+
+            targetDigits = data.digits;
+            currentSolution = data.solution;
 
             if (targetDigits && targetDigits[0] !== 0 && document.getElementById('n1').innerText !== String(targetDigits[0])) {
                 setupBoardUI(targetDigits);
@@ -763,7 +830,7 @@
                 if (data.winner === myPlayerName) {
                     feedback.style.color = '#2e7d32';
                     feedback.innerText = "You Won! 🏆 You got the star!";
-                    if (isHost) setTimeout(getSolvableCombination, 2500);
+                    if (isHost) setTimeout(getSolvableCombination, 3000);
                 } else {
                     feedback.style.color = '#d32f2f';
                     feedback.innerText = `${data.winner} solved it first!`;
@@ -784,9 +851,14 @@
         clearInterval(timerInterval);
         clearInterval(refreshInterval);
         if (isMultiplayer && currentRoomId) {
-            if (isHost) {
-                db.ref('rooms/' + currentRoomId).remove();
-            }
+            db.ref('rooms/' + currentRoomId + '/scores/' + myPlayerName).remove();
+            
+            // Cleanup database overhead structure if room empties out
+            db.ref('rooms/' + currentRoomId + '/scores').once('value', snapshot => {
+                if (!snapshot.exists()) {
+                    db.ref('rooms/' + currentRoomId).remove();
+                }
+            });
             db.ref('rooms/' + currentRoomId).off();
         }
         showScreen('menu-screen');
