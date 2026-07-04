@@ -24,7 +24,6 @@
             width: 100vw;
         }
         
-        /* Global App Title Header */
         .app-main-header {
             text-align: center;
             font-size: 2.8rem;
@@ -35,7 +34,6 @@
             letter-spacing: 1px;
         }
 
-        /* Fluid layout base directly using the screen real estate */
         .app-workspace {
             width: 100%;
             max-width: 1100px;
@@ -44,7 +42,6 @@
         .screen { display: none; }
         .screen.active { display: block; }
 
-        /* Setup Windows centered */
         .centered-panel {
             max-width: 400px;
             margin: 30px auto;
@@ -74,7 +71,6 @@
         }
         input[type="text"]:focus { border-color: #9c27b0; }
 
-        /* Playful 3D Button Style */
         button {
             background-color: #9c27b0;
             color: white;
@@ -108,7 +104,6 @@
             justify-content: space-between;
         }
 
-        /* Column 1: Scoreboard Left */
         .side-scores {
             flex: 1;
             max-width: 220px;
@@ -135,7 +130,6 @@
         }
         .score-item.me { background: #e3f2fd; border-color: #4fc3f7; color: #0d47a1; font-size: 1.1rem; }
 
-        /* Column 2: Main Play Area Center */
         .center-board {
             flex: 2;
             background: white;
@@ -151,7 +145,6 @@
         }
         .timer { font-size: 2.2rem; font-weight: 900; color: #e53935; margin-bottom: 5px; text-shadow: 1px 1px 0 #fff; }
         
-        /* Large Toy Block Numbers */
         .num-container { display: flex; justify-content: center; gap: 12px; margin: 20px 0; }
         .num-box { 
             background: #ffeb3b; 
@@ -187,7 +180,6 @@
         .btn-group button { margin: 0; }
         .profile-badge { font-size: 0.95rem; background: #e0f7fa; color: #006064; padding: 6px 16px; border-radius: 20px; display: inline-block; margin-bottom: 15px; font-weight: bold; border: 2px solid #b2ebf2; }
 
-        /* Column 3: Custom Signs & Actions Pad Right */
         .side-pad {
             flex: 1.2;
             max-width: 280px;
@@ -222,7 +214,6 @@
             transform: translateY(3px);
             box-shadow: 0 1px 0px #cbd5e1;
         }
-        /* Operator Blue Blocks */
         .pad-btn.op { background-color: #e0f2fe; color: #0284c7; box-shadow: 0 4px 0px #bae6fd; font-size: 1.8rem; }
         .pad-btn.op:active { box-shadow: 0 1px 0px #bae6fd; }
         
@@ -235,7 +226,21 @@
         .pad-btn.action { background-color: #4caf50; color: white; box-shadow: 0 4px 0px #1b5e20; font-size: 1.2rem; grid-column: span 2; margin-top: 4px; }
         .pad-btn.action:active { box-shadow: 0 1px 0px #1b5e20; }
 
-        /* Responsive Flow For Phones */
+        /* Spinner for waiting room */
+        .spinner {
+            border: 6px solid #f3f3f3;
+            border-top: 6px solid #e91e63;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 1s linear infinite;
+            margin: 20px auto;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
         @media (max-width: 768px) {
             body { padding: 10px; }
             .app-main-header { font-size: 2.2rem; margin: 5px 0 10px 0; }
@@ -247,12 +252,10 @@
             .num-box { width: 60px; height: 60px; line-height: 52px; font-size: 2.2rem; }
         }
     </style>
-    <!-- Include Google Font for beautiful rounded text -->
     <link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght=700;900&display=swap" rel="stylesheet">
 </head>
 <body>
 
-<!-- GLOBAL TOP HEADER TITLE -->
 <div class="app-main-header">24 Game</div>
 
 <div class="app-workspace">
@@ -293,11 +296,20 @@
         </div>
     </div>
 
+    <!-- SCREEN 2.5: MATCHMAKING WAITING SCREEN -->
+    <div id="waiting-screen" class="screen">
+        <div class="centered-panel">
+            <h1 id="waiting-status-title">Looking for Player...</h1>
+            <div class="spinner"></div>
+            <p id="waiting-status-desc">Waiting for an opponent to join the arena.</p>
+            <button class="secondary" style="background-color: #757575; box-shadow:0 4px 0 #424242;" onclick="leaveGame()">Cancel & Exit</button>
+        </div>
+    </div>
+
     <!-- SCREEN 3: GAME BOARD -->
     <div id="game-screen" class="screen">
         <div class="game-layout">
             
-            <!-- LEFT: SCOREBAR COLUMN -->
             <div class="side-scores">
                 <h3>🏆 Stars Won</h3>
                 <ul class="score-list" id="score-display-list">
@@ -305,12 +317,11 @@
                 </ul>
             </div>
 
-            <!-- CENTER: PLAY MAT COLUMN -->
             <div class="center-board">
                 <div>
                     <h1 id="game-title" style="font-size: 1.5rem; margin:0;">Game Board</h1>
                     <div id="room-display" style="color: #7b1fa2; font-size: 0.9rem; font-weight:bold; margin-bottom: 5px;"></div>
-                    <div class="timer" id="timer-display">05:00</div>
+                    <div class="timer" id="timer-display">⏱️ 05:00</div>
                 </div>
 
                 <div class="num-container">
@@ -336,20 +347,15 @@
                 <button class="secondary" style="font-size:0.95rem; padding:10px; background-color:#757575; box-shadow:0 4px 0 #424242;" onclick="leaveGame()">Exit to Menu</button>
             </div>
 
-            <!-- RIGHT: REARRANGED SIGNS & CONTROLS ONLY -->
             <div class="side-pad">
                 <button class="pad-btn op" onclick="appendPad('+')">+</button>
                 <button class="pad-btn op" onclick="appendPad('-')">-</button>
-                
                 <button class="pad-btn op" onclick="appendPad('×')">×</button>
                 <button class="pad-btn op" onclick="appendPad('÷')">÷</button>
-                
                 <button class="pad-btn op" onclick="appendPad('(')">(</button>
                 <button class="pad-btn op" onclick="appendPad(')')">)</button>
-
                 <button class="pad-btn backspace" onclick="backspacePad()">Undo ⌫</button>
                 <button class="pad-btn clear" onclick="clearPad()">Clear ❌</button>
-                
                 <button class="pad-btn action" onclick="checkUserAnswer()">Submit ⭐</button>
             </div>
 
@@ -428,7 +434,6 @@
         inputField.value = inputField.value.slice(0, -1);
     }
 
-    // --- LOGIC: PATCHED SOLVER MATRIX ---
     function solve24(numbers, expressions) {
         if (numbers.length === 1) {
             if (Math.abs(numbers[0] - 24) < 0.001) {
@@ -524,7 +529,7 @@
     function getSolvableCombination() {
         clearInterval(refreshInterval);
         if (isMultiplayer) {
-            if (!isHost) return; // Only host generates cards for the room
+            if (!isHost) return; 
             let digits = [];
             while (true) {
                 digits = [Math.floor(Math.random()*10), Math.floor(Math.random()*10), Math.floor(Math.random()*10), Math.floor(Math.random()*10)];
@@ -532,7 +537,7 @@
                 if (solve24([...digits], digits.map(d=>d.toString()))) break;
             }
             if (currentSolution.startsWith('(') && currentSolution.endsWith(')')) currentSolution = currentSolution.slice(1, -1);
-            db.ref('rooms/' + currentRoomId).update({ digits: digits, solution: currentSolution, winner: null, status: "playing" });
+            db.ref('rooms/' + currentRoomId).update({ digits: digits, solution: currentSolution, winner: null });
             return;
         }
 
@@ -619,7 +624,7 @@
         }, 1000);
     }
 
-    // --- MULTIPLAYER LOBBY CODES ---
+    // --- MULTIPLAYER ROOM ACTIONS ---
     function createRoom() {
         currentRoomId = Math.floor(1000 + Math.random() * 9000).toString(); 
         isMultiplayer = true;
@@ -654,6 +659,7 @@
                 isMultiplayer = true;
                 isHost = false;
                 db.ref('rooms/' + currentRoomId + '/scores/' + myPlayerName).set(0);
+                db.ref('rooms/' + currentRoomId).update({ status: "playing" });
                 
                 listenToRoom();
                 document.getElementById('game-title').innerText = "Multiplayer Race 🏁";
@@ -667,16 +673,15 @@
         });
     }
 
-    // --- AUTOMATIC MATCHMAKING FOR RANDOM PLAYS ---
+    // --- AUTOMATIC MATCHMAKING ---
     function joinRandomRoom() {
         if (!db) return;
-        document.getElementById('feedback-msg').innerText = "Searching for random active match...";
+        showScreen('waiting-screen');
         
         db.ref('rooms').once('value', snapshot => {
             let rooms = snapshot.val() || {};
             let foundRoomId = null;
 
-            // Find an open room marked as "waiting"
             for (let id in rooms) {
                 if (rooms[id].status === "waiting") {
                     foundRoomId = id;
@@ -685,7 +690,6 @@
             }
 
             if (foundRoomId) {
-                // Join existing match
                 currentRoomId = foundRoomId;
                 isMultiplayer = true;
                 isHost = false;
@@ -700,7 +704,6 @@
                 document.getElementById('reveal-btn').style.display = 'none';
                 showScreen('game-screen');
             } else {
-                // No open rooms, establish a new waiting matchmaking room
                 currentRoomId = Math.floor(1000 + Math.random() * 9000).toString();
                 isMultiplayer = true;
                 isHost = true;
@@ -715,12 +718,6 @@
                     scores: multiplayerScores
                 }).then(() => {
                     listenToRoom();
-                    document.getElementById('game-title').innerText = "Random Match 🎲";
-                    document.getElementById('room-display').innerText = "Waiting for an opponent to connect...";
-                    document.getElementById('next-btn').style.display = 'inline-block';
-                    document.getElementById('reveal-btn').style.display = 'none';
-                    showScreen('game-screen');
-                    getSolvableCombination();
                 });
             }
         });
@@ -731,6 +728,24 @@
             const data = snapshot.val();
             if (!data) return;
 
+            // If room is just waiting, lock them on the matchmaking pending layout screen
+            if (data.status === "waiting") {
+                showScreen('waiting-screen');
+                document.getElementById('waiting-status-title').innerText = "Waiting for Opponent...";
+                document.getElementById('waiting-status-desc').innerText = `Room allocated: ${currentRoomId}. Sitting tight until someone joins!`;
+                return;
+            }
+
+            // Once it flips to "playing" or "private", route to the live game layout screen
+            if (document.getElementById('waiting-screen').classList.contains('active')) {
+                document.getElementById('game-title').innerText = "Random Match 🎲";
+                document.getElementById('room-display').innerText = "Opponent found! Race begins!";
+                document.getElementById('next-btn').style.display = isHost ? 'inline-block' : 'none';
+                document.getElementById('reveal-btn').style.display = 'none';
+                showScreen('game-screen');
+                if (isHost) getSolvableCombination();
+            }
+
             targetDigits = data.digits;
             currentSolution = data.solution;
             if (data.scores) {
@@ -738,14 +753,8 @@
                 renderScores();
             }
 
-            // Update board digits dynamically if data shifted
             if (targetDigits && targetDigits[0] !== 0 && document.getElementById('n1').innerText !== String(targetDigits[0])) {
                 setupBoardUI(targetDigits);
-            }
-
-            // If a partner jumps into a waiting lobby match
-            if (data.status === "playing" && document.getElementById('room-display').innerText.includes("Waiting")) {
-                document.getElementById('room-display').innerText = "Opponent matched! Go!";
             }
 
             if (data.winner) {
@@ -775,7 +784,6 @@
         clearInterval(timerInterval);
         clearInterval(refreshInterval);
         if (isMultiplayer && currentRoomId) {
-            // Remove room entirely if the host leaves a waiting lobby queue
             if (isHost) {
                 db.ref('rooms/' + currentRoomId).remove();
             }
