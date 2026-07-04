@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Make 24 Online - Pro Layout</title>
+    <title>Make 24 Online - Kids Edition</title>
     <!-- Firebase Legacy SDKs for easy single-file CDN integration -->
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-database-compat.js"></script>
@@ -11,10 +11,10 @@
         * {
             box-sizing: border-box;
             -webkit-tap-highlight-color: transparent;
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            font-family: 'Fredoka One', 'Nunito', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
         }
         body {
-            background-color: #f0f2f5;
+            background: radial-gradient(circle, #f3e5f5 0%, #e1bee7 100%);
             margin: 0;
             padding: 15px;
             display: flex;
@@ -27,11 +27,12 @@
         /* Global App Title Header */
         .app-main-header {
             text-align: center;
-            font-size: 2.2rem;
-            font-weight: 800;
-            color: #7b1fa2;
-            margin: 10px 0 20px 0;
-            letter-spacing: 0.5px;
+            font-size: 2.8rem;
+            font-weight: 900;
+            color: #9c27b0;
+            text-shadow: 3px 3px 0px #fff, 5px 5px 0px #ba68c8;
+            margin: 5px 0 15px 0;
+            letter-spacing: 1px;
         }
 
         /* Fluid layout base directly using the screen real estate */
@@ -46,50 +47,63 @@
         /* Setup Windows centered */
         .centered-panel {
             max-width: 400px;
-            margin: 40px auto;
+            margin: 30px auto;
             text-align: center;
             background: white;
             padding: 30px;
-            border-radius: 16px;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+            border-radius: 24px;
+            border: 4px solid #ce93d8;
+            box-shadow: 0 8px 0px #ce93d8;
         }
 
-        h1 { margin: 0 0 10px 0; color: #333; font-size: 1.6rem; }
-        p { color: #666; font-size: 0.95rem; margin-bottom: 20px; }
+        h1 { margin: 0 0 10px 0; color: #4a148c; font-size: 1.8rem; }
+        p { color: #6a1b9a; font-size: 1rem; margin-bottom: 20px; font-weight: bold; }
         
         input[type="text"] {
             width: 100%;
             padding: 14px;
-            font-size: 1.2rem;
-            border: 2px solid #ddd;
-            border-radius: 10px;
+            font-size: 1.3rem;
+            border: 3px solid #e1bee7;
+            border-radius: 16px;
             outline: none;
             text-align: center;
-            margin-bottom: 15px;
+            margin-bottom: 18px;
+            background-color: #fdf6ff;
+            color: #4a148c;
+            font-weight: bold;
         }
-        input[type="text"]:focus { border-color: #7b1fa2; }
+        input[type="text"]:focus { border-color: #9c27b0; }
 
+        /* Playful 3D Button Style */
         button {
-            background-color: #7b1fa2;
+            background-color: #9c27b0;
             color: white;
             border: none;
             padding: 14px 20px;
-            font-size: 1.05rem;
-            font-weight: 600;
-            border-radius: 10px;
+            font-size: 1.2rem;
+            font-weight: 800;
+            border-radius: 16px;
             cursor: pointer;
-            margin: 5px 0;
+            margin: 6px 0;
             width: 100%;
-            transition: background 0.15s, transform 0.1s;
+            box-shadow: 0 5px 0px #6a1b9a;
+            transition: all 0.1s ease;
+            position: relative;
         }
-        button:active { transform: scale(0.98); }
-        button.secondary { background-color: #6c757d; }
-        button.success { background-color: #2e7d32; }
+        button:active {
+            transform: translateY(4px);
+            box-shadow: 0 1px 0px #6a1b9a;
+        }
+        button.secondary { background-color: #ff9800; box-shadow: 0 5px 0px #e65100; }
+        button.secondary:active { box-shadow: 0 1px 0px #e65100; }
+        
+        button.success { background-color: #4caf50; box-shadow: 0 5px 0px #2e7d32; }
+        button.success:active { box-shadow: 0 1px 0px #2e7d32; }
 
         /* --- THREE-COLUMN GAMEPLAY LAYOUT --- */
         .game-layout {
             display: flex;
-            gap: 15px;
+            gap: 20px;
             align-items: stretch;
             justify-content: space-between;
         }
@@ -99,97 +113,138 @@
             flex: 1;
             max-width: 220px;
             background: white;
-            border: 1px solid #dee2e6;
-            border-radius: 12px;
+            border: 4px solid #81c784;
+            border-radius: 20px;
             padding: 15px;
             display: flex;
             flex-direction: column;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.02);
+            box-shadow: 0 6px 0px #81c784;
         }
-        .side-scores h3 { margin: 0 0 12px 0; font-size: 1.05rem; color: #495057; border-bottom: 2px solid #edf2f7; padding-bottom: 8px; }
-        .score-list { list-style: none; padding: 0; margin: 0; font-size: 0.95rem; }
+        .side-scores h3 { margin: 0 0 12px 0; font-size: 1.2rem; color: #2e7d32; text-align: center; border-bottom: 3px dashed #c8e6c9; padding-bottom: 8px; }
+        .score-list { list-style: none; padding: 0; margin: 0; font-size: 1rem; }
         .score-item {
             display: flex;
             justify-content: space-between;
-            padding: 8px 10px;
-            border-radius: 6px;
-            margin-bottom: 5px;
-            background: #f8f9fa;
-            border: 1px solid #edf2f7;
+            padding: 10px 12px;
+            border-radius: 12px;
+            margin-bottom: 6px;
+            background: #f1f8e9;
+            border: 2px solid #dedede;
+            font-weight: bold;
+            color: #33691e;
         }
-        .score-item.me { background: #e3f2fd; border-color: #90caf9; font-weight: bold; color: #0d47a1; }
+        .score-item.me { background: #e3f2fd; border-color: #4fc3f7; color: #0d47a1; font-size: 1.1rem; }
 
         /* Column 2: Main Play Area Center */
         .center-board {
             flex: 2;
             background: white;
-            border: 1px solid #dee2e6;
-            border-radius: 12px;
+            border: 4px solid #b3e5fc;
+            border-radius: 24px;
             padding: 20px;
             display: flex;
             flex-direction: column;
             justify-content: space-between;
             text-align: center;
-            min-width: 300px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.02);
+            min-width: 320px;
+            box-shadow: 0 8px 0px #b3e5fc;
         }
-        .timer { font-size: 1.8rem; font-weight: bold; color: #d32f2f; margin-bottom: 5px; }
+        .timer { font-size: 2.2rem; font-weight: 900; color: #e53935; margin-bottom: 5px; text-shadow: 1px 1px 0 #fff; }
         
-        .num-container { display: flex; justify-content: center; gap: 10px; margin: 15px 0; }
-        .num-box { background: #f3e5f5; color: #7b1fa2; font-size: 2.2rem; font-weight: bold; width: 65px; height: 65px; line-height: 61px; border-radius: 12px; border: 2px solid #e1bee7; cursor: pointer; }
+        /* Large Toy Block Numbers */
+        .num-container { display: flex; justify-content: center; gap: 12px; margin: 20px 0; }
+        .num-box { 
+            background: #ffeb3b; 
+            color: #ff6f00; 
+            font-size: 2.8rem; 
+            font-weight: 900; 
+            width: 75px; 
+            height: 75px; 
+            line-height: 67px; 
+            border-radius: 18px; 
+            border: 4px solid #ffcc00; 
+            box-shadow: 0 6px 0px #ffb300;
+            cursor: pointer; 
+            transition: all 0.1s;
+        }
+        .num-box:active {
+            transform: translateY(4px);
+            box-shadow: 0 2px 0px #ffb300;
+        }
+
+        .input-section { margin: 10px 0; }
+        #user-input {
+            background-color: #fffde7;
+            border: 3px solid #fff59d;
+            color: #e65100;
+            font-size: 1.6rem;
+            height: 55px;
+        }
+
+        .feedback { font-weight: 900; margin: 10px 0; font-size: 1.3rem; min-height: 30px; letter-spacing: 0.5px; }
+        .answer-box { padding: 15px; background: #e8f5e9; color: #2e7d32; border-radius: 16px; font-weight: 900; font-size: 1.2rem; display: none; border: 3px solid #a5d6a7; }
+        .btn-group { display: flex; gap: 10px; margin-top: 10px; }
+        .btn-group button { margin: 0; }
+        .profile-badge { font-size: 0.95rem; background: #e0f7fa; color: #006064; padding: 6px 16px; border-radius: 20px; display: inline-block; margin-bottom: 15px; font-weight: bold; border: 2px solid #b2ebf2; }
 
         /* Column 3: Number Pad Right */
         .side-pad {
             flex: 1.2;
-            max-width: 260px;
+            max-width: 280px;
             display: grid;
             grid-template-columns: repeat(4, 1fr);
-            gap: 6px;
+            gap: 8px;
             background: white;
             padding: 15px;
-            border-radius: 12px;
-            border: 1px solid #dee2e6;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.02);
+            border-radius: 24px;
+            border: 4px solid #ffcc80;
+            box-shadow: 0 8px 0px #ffcc80;
         }
         .pad-btn {
             width: 100%;
-            height: 52px;
+            height: 54px;
             margin: 0;
             padding: 0;
-            font-size: 1.25rem;
-            background-color: #f8f9fa;
-            color: #333;
-            border: 1px solid #e2e8f0;
-            border-radius: 8px;
+            font-size: 1.4rem;
+            background-color: #f1f5f9;
+            color: #334155;
+            border: none;
+            border-radius: 12px;
             display: flex;
             align-items: center;
             justify-content: center;
             cursor: pointer;
-            font-weight: 500;
+            font-weight: 900;
+            box-shadow: 0 4px 0px #cbd5e1;
+            transition: all 0.1s;
         }
-        .pad-btn:active { background-color: #cbd5e1; }
-        .pad-btn.op { background-color: #fff9db; color: #f59f00; border-color: #ffe066; font-weight: bold; font-size: 1.4rem; }
-        .pad-btn.action { background-color: #e8f5e9; color: #2e7d32; border-color: #c8e6c9; font-size: 0.95rem; font-weight: bold; }
-        .pad-btn.clear { background-color: #ffebee; color: #c62828; border-color: #ffcdd2; font-size: 0.95rem; font-weight: bold; }
-
-        /* General UI Elements */
-        .feedback { font-weight: bold; margin: 10px 0; font-size: 1.1rem; min-height: 26px; }
-        .answer-box { padding: 12px; background: #e8f5e9; color: #2e7d32; border-radius: 10px; font-weight: bold; display: none; border: 1px solid #c8e6c9; }
-        .btn-group { display: flex; gap: 8px; margin-top: 10px; }
-        .btn-group button { margin: 0; }
-        .profile-badge { font-size: 0.85rem; background: #e0f7fa; color: #006064; padding: 4px 12px; border-radius: 20px; display: inline-block; margin-bottom: 15px; font-weight: 500; }
+        .pad-btn:active { 
+            transform: translateY(3px);
+            box-shadow: 0 1px 0px #cbd5e1;
+        }
+        /* Operator Blue/Orange Blocks */
+        .pad-btn.op { background-color: #e0f2fe; color: #0284c7; box-shadow: 0 4px 0px #bae6fd; font-size: 1.6rem; }
+        .pad-btn.op:active { box-shadow: 0 1px 0px #bae6fd; }
+        
+        .pad-btn.action { background-color: #4caf50; color: white; box-shadow: 0 4px 0px #1b5e20; font-size: 1.1rem; }
+        .pad-btn.action:active { box-shadow: 0 1px 0px #1b5e20; }
+        
+        .pad-btn.clear { background-color: #f44336; color: white; box-shadow: 0 4px 0px #b71c1c; font-size: 1.1rem; }
+        .pad-btn.clear:active { box-shadow: 0 1px 0px #b71c1c; }
 
         /* Responsive Flow For Phones */
         @media (max-width: 768px) {
-            body { padding: 8px; }
-            .app-main-header { font-size: 1.8rem; margin: 5px 0 15px 0; }
+            body { padding: 10px; }
+            .app-main-header { font-size: 2.2rem; margin: 5px 0 10px 0; }
             .game-layout { flex-direction: column; }
-            .side-scores { max-width: 100%; order: 1; }
-            .center-board { order: 2; }
-            .side-pad { max-width: 100%; order: 3; }
-            .num-box { width: 55px; height: 55px; line-height: 51px; font-size: 1.8rem; }
+            .side-scores { max-width: 100%; order: 1; box-shadow: 0 4px 0px #81c784; }
+            .center-board { order: 2; box-shadow: 0 5px 0px #b3e5fc; }
+            .side-pad { max-width: 100%; order: 3; box-shadow: 0 5px 0px #ffcc80; }
+            .num-box { width: 60px; height: 60px; line-height: 52px; font-size: 2.2rem; }
         }
     </style>
+    <!-- Include Google Font for beautiful rounded text -->
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@700;900&display=swap" rel="stylesheet">
 </head>
 <body>
 
@@ -200,10 +255,10 @@
     <!-- SCREEN 0: REGISTRATION -->
     <div id="register-screen" class="screen active">
         <div class="centered-panel">
-            <h1>Player Profile</h1>
-            <p>Enter your profile name</p>
-            <input type="text" id="username-input" placeholder="Enter Nickname/Name">
-            <button class="success" onclick="saveProfile()">Save & Continue</button>
+            <h1>Welcome Player!</h1>
+            <p>What is your name?</p>
+            <input type="text" id="username-input" placeholder="Type your name here...">
+            <button class="success" onclick="saveProfile()">Let's Play! 🎉</button>
         </div>
     </div>
 
@@ -211,24 +266,24 @@
     <div id="menu-screen" class="screen">
         <div class="centered-panel">
             <div class="profile-badge" id="player-tag">Player:</div>
-            <h1>Game Navigation</h1>
-            <p>Select your game mode</p>
-            <button onclick="startSoloGame()">Solo Mode</button>
-            <button class="secondary" onclick="showLobbyMenu()">Multiplayer Room</button>
-            <button style="background:transparent; color:#777; font-size:0.85rem; text-decoration:underline;" onclick="editProfile()">Change Name</button>
+            <h1>Choose Mode</h1>
+            <p>Ready to challenge your brain?</p>
+            <button onclick="startSoloGame()">Single Player 🌟</button>
+            <button class="secondary" onclick="showLobbyMenu()">Play with Friends 🚀</button>
+            <button style="background:transparent; color:#7b1fa2; font-size:0.9rem; text-decoration:underline; box-shadow:none; margin-top:10px;" onclick="editProfile()">Change Name</button>
         </div>
     </div>
 
     <!-- SCREEN 2: LOBBY -->
     <div id="lobby-screen" class="screen">
         <div class="centered-panel">
-            <h1>Multiplayer Lobby</h1>
-            <p>Create or join a room</p>
-            <button onclick="createRoom()">+ Create New Room</button>
-            <div style="margin: 15px 0; font-weight: bold; color: #888;">OR</div>
-            <input type="text" id="room-id-input" placeholder="4-Digit Room Code" pattern="\d*" inputmode="numeric">
-            <button class="success" onclick="joinRoom()">Join Room</button>
-            <button class="secondary" style="margin-top: 15px;" onclick="showScreen('menu-screen')">Back to Menu</button>
+            <h1>Game Lobby</h1>
+            <p>Create or find a room code</p>
+            <button onclick="createRoom()">+ Make a New Room</button>
+            <div style="margin: 15px 0; font-weight: 900; color: #9c27b0; font-size:1.2rem;">- OR -</div>
+            <input type="text" id="room-id-input" placeholder="Enter 4-Digit Code" pattern="\d*" inputmode="numeric">
+            <button class="success" onclick="joinRoom()">Join Friend's Room</button>
+            <button class="secondary" style="margin-top: 15px;" onclick="showScreen('menu-screen')">Go Back</button>
         </div>
     </div>
 
@@ -238,7 +293,7 @@
             
             <!-- LEFT: SCOREBAR COLUMN -->
             <div class="side-scores">
-                <h3>🏆 Scoreboard</h3>
+                <h3>🏆 Stars Won</h3>
                 <ul class="score-list" id="score-display-list">
                     <li class="score-item me"><span>You</span><span>0</span></li>
                 </ul>
@@ -247,8 +302,8 @@
             <!-- CENTER: PLAY MAT COLUMN -->
             <div class="center-board">
                 <div>
-                    <h1 id="game-title" style="font-size: 1.4rem; margin:0;">Game Board</h1>
-                    <div id="room-display" style="color: #666; font-size: 0.85rem; margin-bottom: 5px;"></div>
+                    <h1 id="game-title" style="font-size: 1.5rem; margin:0;">Game Board</h1>
+                    <div id="room-display" style="color: #7b1fa2; font-size: 0.9rem; font-weight:bold; margin-bottom: 5px;"></div>
                     <div class="timer" id="timer-display">05:00</div>
                 </div>
 
@@ -260,19 +315,19 @@
                 </div>
 
                 <div class="input-section">
-                    <input type="text" id="user-input" placeholder="Tap pad below to solve" readonly>
+                    <input type="text" id="user-input" placeholder="Tap numbers & signs to make 24!" readonly>
                     <div class="feedback" id="feedback-msg"></div>
                     <div class="answer-box" id="answer">
                         Solution: <span id="solution-text"></span>
-                        <div style="font-size:0.8rem; font-style:italic; margin-top:5px;" id="refresh-countdown"></div>
+                        <div style="font-size:0.85rem; font-style:italic; margin-top:5px; font-weight:bold;" id="refresh-countdown"></div>
                     </div>
                 </div>
 
                 <div class="btn-group">
-                    <button id="next-btn" onclick="getSolvableCombination()">Next Match</button>
-                    <button class="secondary" id="reveal-btn" onclick="revealAnswerAndReset()">Reveal</button>
+                    <button id="next-btn" onclick="getSolvableCombination()">Skip Card ⏭️</button>
+                    <button class="secondary" id="reveal-btn" onclick="revealAnswerAndReset()">Show Answer 💡</button>
                 </div>
-                <button class="secondary" style="font-size:0.9rem; padding:10px;" onclick="leaveGame()">Exit to Menu</button>
+                <button class="secondary" style="font-size:0.95rem; padding:10px; background-color:#757575; box-shadow:0 4px 0 #424242;" onclick="leaveGame()">Exit to Menu</button>
             </div>
 
             <!-- RIGHT: REARRANGED SEQUENTIAL KEYPAD COLUMN -->
@@ -297,8 +352,8 @@
                 <button class="pad-btn" onclick="appendPad('2')">2</button>
                 <button class="pad-btn" onclick="appendPad('3')">3</button>
 
-                <button class="pad-btn clear" style="grid-column: span 2;" onclick="clearPad()">Clear</button>
-                <button class="pad-btn action" style="grid-column: span 2;" onclick="checkUserAnswer()">Submit</button>
+                <button class="pad-btn clear" style="grid-column: span 2;" onclick="clearPad()">Clear ❌</button>
+                <button class="pad-btn action" style="grid-column: span 2;" onclick="checkUserAnswer()">Submit ⭐</button>
             </div>
 
         </div>
@@ -352,7 +407,7 @@
 
     function saveProfile() {
         const inputName = document.getElementById('username-input').value.trim();
-        if (!inputName) return alert("Please enter a valid nickname.");
+        if (!inputName) return alert("Please enter a valid name.");
         myPlayerName = inputName;
         localStorage.setItem('make24_username', myPlayerName);
         document.getElementById('player-tag').innerText = `👤 Player: ${myPlayerName}`;
@@ -411,11 +466,11 @@
         const listContainer = document.getElementById('score-display-list');
         listContainer.innerHTML = "";
         if (!isMultiplayer) {
-            listContainer.innerHTML = `<li class="score-item me"><span>${myPlayerName}</span><span>${soloScore}</span></li>`;
+            listContainer.innerHTML = `<li class="score-item me"><span>${myPlayerName}</span><span>⭐ ${soloScore}</span></li>`;
         } else {
             Object.keys(multiplayerScores).sort((a,b) => multiplayerScores[b] - multiplayerScores[a]).forEach(user => {
                 const isMe = user === myPlayerName ? "me" : "";
-                listContainer.innerHTML += `<li class="score-item ${isMe}"><span>${user}</span><span>${multiplayerScores[user]}</span></li>`;
+                listContainer.innerHTML += `<li class="score-item ${isMe}"><span>${user}</span><span>⭐ ${multiplayerScores[user]}</span></li>`;
             });
         }
     }
@@ -423,7 +478,7 @@
     function startSoloGame() {
         isMultiplayer = false;
         soloScore = 0;
-        document.getElementById('game-title').innerText = "Solo Mode";
+        document.getElementById('game-title').innerText = "Solo Mode 🌟";
         document.getElementById('room-display').innerText = "";
         document.getElementById('next-btn').style.display = 'inline-block';
         showScreen('game-screen');
@@ -446,7 +501,7 @@
             if (timeRemaining <= 0) {
                 clearInterval(timerInterval);
                 document.getElementById('feedback-msg').style.color = '#d32f2f';
-                document.getElementById('feedback-msg').innerText = "Out of time!";
+                document.getElementById('feedback-msg').innerText = "Out of time! Try next card! ⏰";
             }
         }, 1000);
     }
@@ -454,7 +509,7 @@
     function updateTimerDisplay() {
         let m = Math.floor(timeRemaining / 60).toString().padStart(2, '0');
         let s = (timeRemaining % 60).toString().padStart(2, '0');
-        document.getElementById('timer-display').innerText = `${m}:${s}`;
+        document.getElementById('timer-display').innerText = `⏱️ ${m}:${s}`;
     }
 
     function getSolvableCombination() {
@@ -500,10 +555,10 @@
         const userDigits = inputRaw.match(/\d/g);
 
         if (!userDigits || userDigits.length !== 4) {
-            feedback.style.color = '#d32f2f'; feedback.innerText = "Error: Must use exactly 4 digits."; return;
+            feedback.style.color = '#e53935'; feedback.innerText = "Oops! You must use all 4 numbers."; return;
         }
         if ([...targetDigits].sort().join('') !== [...userDigits].map(Number).sort().join('')) {
-            feedback.style.color = '#d32f2f'; feedback.innerText = "Error: Digits do not match puzzle."; return;
+            feedback.style.color = '#e53935'; feedback.innerText = "Check again! Use only the given numbers."; return;
         }
 
         let jsEvalString = inputRaw.replace(/×/g, '*').replace(/÷/g, '/');
@@ -517,17 +572,17 @@
                     db.ref('rooms/' + currentRoomId).update({ winner: myPlayerName });
                 } else {
                     feedback.style.color = '#2e7d32';
-                    feedback.innerText = "Correct! 🎉";
+                    feedback.innerText = "Awesome! Correct! 🎉 +1 Star!";
                     soloScore++;
                     renderScores();
                     clearInterval(timerInterval);
                     setTimeout(getSolvableCombination, 1500);
                 }
             } else {
-                feedback.style.color = '#d32f2f'; feedback.innerText = `Equals ${result}, not 24.`;
+                feedback.style.color = '#e53935'; feedback.innerText = `That equals ${result}, try to make 24!`;
             }
         } catch (e) {
-            feedback.style.color = '#d32f2f'; feedback.innerText = "Evaluation error. Check brackets.";
+            feedback.style.color = '#e53935'; feedback.innerText = "Math error! Check your brackets ( ).";
         }
     }
 
@@ -539,12 +594,12 @@
         
         let refreshSecs = 10;
         const countdownDisplay = document.getElementById('refresh-countdown');
-        countdownDisplay.innerText = `Refreshing puzzle in ${refreshSecs}s...`;
+        countdownDisplay.innerText = `New puzzle in ${refreshSecs} seconds...`;
         
         clearInterval(refreshInterval);
         refreshInterval = setInterval(() => {
             refreshSecs--;
-            countdownDisplay.innerText = `Refreshing puzzle in ${refreshSecs}s...`;
+            countdownDisplay.innerText = `New puzzle in ${refreshSecs} seconds...`;
             if (refreshSecs <= 0) {
                 clearInterval(refreshInterval);
                 getSolvableCombination();
@@ -567,7 +622,7 @@
             scores: multiplayerScores
         }).then(() => {
             listenToRoom();
-            document.getElementById('game-title').innerText = "Multiplayer Arena";
+            document.getElementById('game-title').innerText = "Multiplayer Arena 🚀";
             document.getElementById('room-display').innerText = `Room Code: ${currentRoomId} (Host)`;
             document.getElementById('next-btn').style.display = 'inline-block';
             document.getElementById('reveal-btn').style.display = 'none'; 
@@ -587,13 +642,13 @@
                 db.ref('rooms/' + currentRoomId + '/scores/' + myPlayerName).set(0);
                 
                 listenToRoom();
-                document.getElementById('game-title').innerText = "Multiplayer Race";
+                document.getElementById('game-title').innerText = "Multiplayer Race 🏁";
                 document.getElementById('room-display').innerText = `Room Code: ${currentRoomId} (Guest)`;
                 document.getElementById('next-btn').style.display = 'none'; 
                 document.getElementById('reveal-btn').style.display = 'none';
                 showScreen('game-screen');
             } else {
-                alert("Room not found.");
+                alert("Room not found! Double check the numbers.");
             }
         });
     }
@@ -619,14 +674,14 @@
                 const feedback = document.getElementById('feedback-msg');
                 if (data.winner === myPlayerName) {
                     feedback.style.color = '#2e7d32';
-                    feedback.innerText = "You Won! 🏆";
+                    feedback.innerText = "You Won! 🏆 You got the star!";
                 } else {
                     feedback.style.color = '#d32f2f';
-                    feedback.innerText = `Winner: ${data.winner}`;
+                    feedback.innerText = `${data.winner} solved it first!`;
                 }
                 document.getElementById('answer').style.display = 'block';
                 document.getElementById('solution-text').innerText = currentSolution + " = 24";
-                document.getElementById('refresh-countdown').innerText = "Waiting for host to cycle card...";
+                document.getElementById('refresh-countdown').innerText = "Waiting for Host to deal a new card...";
             }
         });
     }
