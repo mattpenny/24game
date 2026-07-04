@@ -322,8 +322,8 @@
                     <div class="timer" id="timer-display">⏱️ 05:00</div>
                 </div>
 
-                <!-- NEW DROP-IN INTERMISSION SHIELD PANEL -->
-                <div id="dropin-wait-msg" style="display:none; background:#ffffe0; border:3px dashed #ffb74d; padding:20px; border-radius:16px; font-weight:bold; color:#e65100; margin: 20px 0;">
+                <!-- DROP-IN INTERMISSION SHIELD PANEL -->
+                <div id="dropin-wait-msg" style="display:none; background:#ffffe0; border:3px dashed #ffb74d; padding:20px; border-radius:166px; font-weight:bold; color:#e65100; margin: 20px 0;">
                     ⏳ Round in progress! <br><span style="font-size:0.9rem; color:#666;">You'll automatically join on the very next card.</span>
                 </div>
 
@@ -524,8 +524,15 @@
             updateTimerDisplay();
             if (timeRemaining <= 0) {
                 clearInterval(timerInterval);
-                document.getElementById('feedback-msg').style.color = '#d32f2f';
-                document.getElementById('feedback-msg').innerText = "Out of time! Try next card! ⏰";
+                if (isMultiplayer) {
+                    if (isHost) {
+                        db.ref('rooms/' + currentRoomId).update({ winner: "TIMEOUT_NO_WINNER" });
+                    }
+                } else {
+                    document.getElementById('feedback-msg').style.color = '#d32f2f';
+                    document.getElementById('feedback-msg').innerText = "Out of time! Let's see the answer. ⏰";
+                    revealAnswerAndReset();
+                }
             }
         }, 1000);
     }
@@ -657,8 +664,7 @@
             document.getElementById('reveal-btn').style.display = 'none'; 
             document.getElementById('active-puzzle-ui').style.display = 'block';
             document.getElementById('dropin-wait-msg').style.display = 'none';
-            showScreen('game-screen');
-            getSolvableCombination();
+            showScreen('waiting-screen');
         });
     }
 
@@ -675,28 +681,22 @@
                 currentRoomId = inputCode;
                 isMultiplayer = true;
                 isHost = false;
-                
-                // If data digits are active, lock out input initially until next card reset loop triggers
                 hasJoinedActiveRound = (roomData.digits && roomData.digits[0] === 0);
 
                 db.ref('rooms/' + currentRoomId + '/scores/' + myPlayerName).set(0);
-                if (roomData.status === "waiting") {
-                    db.ref('rooms/' + currentRoomId).update({ status: "open" });
-                }
                 
                 listenToRoom();
                 document.getElementById('game-title').innerText = "Multiplayer Race 🏁";
-                document.getElementById('room-display').innerText = `Room Code: ${currentRoomId}`;
+                document.getElementById('room-display').innerText = `Room Code: ${inputCode}`;
                 document.getElementById('next-btn').style.display = 'none'; 
                 document.getElementById('reveal-btn').style.display = 'none';
-                showScreen('game-screen');
+                showScreen('waiting-screen');
             } else {
                 alert("Room not found! Double check the numbers.");
             }
         });
     }
 
-    // --- AUTOMATIC DYNAMIC MATCHMAKING (MAX 6) ---
     function joinRandomRoom() {
         if (!db) return;
         showScreen('waiting-screen');
@@ -705,7 +705,6 @@
             let rooms = snapshot.val() || {};
             let foundRoomId = null;
 
-            // Target rooms marked "waiting" or "open" that haven't hit the 6-player ceiling yet
             for (let id in rooms) {
                 let pCount = Object.keys(rooms[id].scores || {}).length;
                 if ((rooms[id].status === "waiting" || rooms[id].status === "open") && pCount < 6) {
@@ -720,20 +719,11 @@
                 isHost = false;
                 
                 let activeRoom = rooms[foundRoomId];
-                // Check if they are dropping into an already active ongoing card problem
                 hasJoinedActiveRound = (activeRoom.digits && activeRoom.digits[0] === 0 || !activeRoom.winner);
 
                 db.ref('rooms/' + currentRoomId + '/scores/' + myPlayerName).set(0);
-                db.ref('rooms/' + currentRoomId).update({ status: "open" });
-
                 listenToRoom();
-                document.getElementById('game-title').innerText = "Random Match 🎲";
-                document.getElementById('room-display').innerText = "Playing Online Match";
-                document.getElementById('next-btn').style.display = 'none';
-                document.getElementById('reveal-btn').style.display = 'none';
-                showScreen('game-screen');
             } else {
-                // Initialize room set to "waiting"
                 currentRoomId = Math.floor(1000 + Math.random() * 9000).toString();
                 isMultiplayer = true;
                 isHost = true;
@@ -773,14 +763,17 @@
 
             let activePlayersCount = Object.keys(multiplayerScores).length;
 
-            // Screen layout logic for the initial setup phase
-            if (data.status === "waiting") {
+            if (data.status === "waiting" || (data.status === "private" && data.digits[0] === 0)) {
                 showScreen('waiting-screen');
-                document.getElementById('waiting-status-title').innerText = "Waiting for Opponent...";
-                document.getElementById('waiting-status-desc').innerText = `Room Code Allocated: ${currentRoomId}. Invite friends or wait for an online matchmaking match!`;
+                if (data.status === "private") {
+                    document.getElementById('waiting-status-title').innerText = "Private Lobby Room";
+                    document.getElementById('waiting-status-desc').innerText = `Share Code: ${currentRoomId}. Waiting for your crew to connect.`;
+                } else {
+                    document.getElementById('waiting-status-title').innerText = "Gathering Players...";
+                    document.getElementById('waiting-status-desc').innerText = "Looking for players globally in matchmaking queue...";
+                }
                 document.getElementById('player-count-indicator').innerText = `Players connected: ${activePlayersCount}/6`;
                 
-                // Allow premature starting as long as at least 2 players are present
                 if (isHost && activePlayersCount >= 2) {
                     document.getElementById('force-start-btn').style.display = 'block';
                 } else {
@@ -789,21 +782,16 @@
                 return;
             }
 
-            // Route out of lobby screen as soon as state shifts to open
             if (document.getElementById('waiting-screen').classList.contains('active')) {
                 document.getElementById('game-title').innerText = "Multiplayer Arena 🏁";
-                document.getElementById('room-display').innerText = `Room Code: ${currentRoomId} (${activePlayersCount}/6 Players)`;
                 document.getElementById('next-btn').style.display = isHost ? 'inline-block' : 'none';
                 document.getElementById('reveal-btn').style.display = 'none';
                 showScreen('game-screen');
-                if (isHost && data.digits[0] === 0) getSolvableCombination();
             }
 
             document.getElementById('room-display').innerText = `Room Code: ${currentRoomId} (${activePlayersCount}/6 Players)`;
 
-            // MID-ROUND JOINING AND DROP-IN VALIDATION HOOK
             if (data.winner) {
-                // When a winner is set, it means this cycle round is ending. Next card resets lock shield!
                 hasJoinedActiveRound = true; 
             }
 
@@ -827,19 +815,24 @@
             if (data.winner) {
                 clearInterval(timerInterval);
                 const feedback = document.getElementById('feedback-msg');
-                if (data.winner === myPlayerName) {
+                
+                if (data.winner === "TIMEOUT_NO_WINNER") {
+                    feedback.style.color = '#e53935';
+                    feedback.innerText = "Time's Up! No one answered in 5 minutes! ⏰";
+                } else if (data.winner === myPlayerName) {
                     feedback.style.color = '#2e7d32';
                     feedback.innerText = "You Won! 🏆 You got the star!";
-                    if (isHost) setTimeout(getSolvableCombination, 3000);
                 } else {
                     feedback.style.color = '#d32f2f';
                     feedback.innerText = `${data.winner} solved it first!`;
                 }
+                
                 document.getElementById('answer').style.display = 'block';
                 document.getElementById('solution-text').innerText = currentSolution + " = 24";
                 
                 if (isHost) {
                     document.getElementById('refresh-countdown').innerText = "Dealing next puzzle card shortly...";
+                    setTimeout(getSolvableCombination, 4000);
                 } else {
                     document.getElementById('refresh-countdown').innerText = "Waiting for Host to deal a new card...";
                 }
@@ -852,8 +845,6 @@
         clearInterval(refreshInterval);
         if (isMultiplayer && currentRoomId) {
             db.ref('rooms/' + currentRoomId + '/scores/' + myPlayerName).remove();
-            
-            // Cleanup database overhead structure if room empties out
             db.ref('rooms/' + currentRoomId + '/scores').once('value', snapshot => {
                 if (!snapshot.exists()) {
                     db.ref('rooms/' + currentRoomId).remove();
