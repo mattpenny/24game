@@ -1,0 +1,419 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Make 24 Online - Solo & Multiplayer</title>
+    <!-- Firebase Legacy SDKs for easy single-file CDN integration -->
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-database-compat.js"></script>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f0f2f5;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+        .card {
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            text-align: center;
+            max-width: 440px;
+            width: 100%;
+        }
+        .screen { display: none; }
+        .screen.active { display: block; }
+        h1 { color: #333; margin-bottom: 5px; }
+        .timer { font-size: 1.5rem; font-weight: bold; color: #d32f2f; margin-bottom: 5px; }
+        p { color: #666; font-size: 0.9rem; margin: 5px 0 20px 0; }
+        .instructions { font-size: 0.8rem; color: #888; background: #fdf6e2; padding: 6px; border-radius: 4px; margin-bottom: 20px; border: 1px solid #f5e7c4; }
+        .num-container { display: flex; justify-content: space-between; margin-bottom: 25px; gap: 10px; }
+        .num-box { background: #f3e5f5; color: #7b1fa2; font-size: 2.2rem; font-weight: bold; flex: 1; height: 70px; line-height: 70px; border-radius: 8px; border: 2px solid #e1bee7; }
+        .input-section { margin-bottom: 20px; }
+        input[type="text"] { width: 70%; padding: 12px; font-size: 1.1rem; border: 2px solid #ccc; border-radius: 6px; outline: none; text-align: center; }
+        input[type="text"]:focus { border-color: #7b1fa2; }
+        button { background-color: #7b1fa2; color: white; border: none; padding: 12px 20px; font-size: 1rem; border-radius: 6px; cursor: pointer; margin: 5px; transition: background 0.2s; }
+        button:hover { background-color: #4a148c; }
+        button.secondary { background-color: #6c757d; }
+        button.secondary:hover { background-color: #5a6268; }
+        button.success { background-color: #2e7d32; }
+        button.success:hover { background-color: #1b5e20; }
+        .feedback { font-weight: bold; margin-top: 15px; font-size: 1.1rem; }
+        .answer-box { margin-top: 20px; padding: 15px; background: #e8f5e9; color: #2e7d32; border-radius: 6px; font-weight: bold; display: none; border: 1px solid #c8e6c9; font-size: 1.1rem; }
+        .refresh-text { font-size: 0.85rem; color: #c62828; margin-top: 10px; font-style: italic; }
+        .menu-btn { width: 80%; margin: 10px auto; display: block; font-size: 1.1rem; padding: 15px; }
+        .lobby-input { padding: 10px; font-size: 1rem; width: 60%; margin-bottom: 10px; text-align: center; }
+    </style>
+</head>
+<body>
+
+<div class="card">
+    <!-- SCREEN 1: MAIN MENU -->
+    <div id="menu-screen" class="screen active">
+        <h1>Make 24 Online</h1>
+        <p>Choose your game mode</p>
+        <button class="menu-btn" onclick="startSoloGame()">Solo Mode</button>
+        <button class="menu-btn secondary" onclick="showLobbyMenu()">Multiplayer Room</button>
+    </div>
+
+    <!-- SCREEN 2: MULTIPLAYER LOBBY OPTIONS -->
+    <div id="lobby-screen" class="screen">
+        <h1>Multiplayer Lobby</h1>
+        <p>Create a room or join an existing one</p>
+        <button onclick="createRoom()">+ Create New Room</button>
+        <div style="margin: 20px 0;">or</div>
+        <input type="text" id="room-id-input" class="lobby-input" placeholder="Enter 4-Digit Room Code"><br>
+        <button class="success" onclick="joinRoom()">Join Room</button>
+        <br><br>
+        <button class="secondary" onclick="showScreen('menu-screen')">Back to Menu</button>
+    </div>
+
+    <!-- SCREEN 3: THE GAME BOARD -->
+    <div id="game-screen" class="screen">
+        <h1 id="game-title">Make 24</h1>
+        <div id="room-display" style="font-weight: bold; color: #555; margin-bottom: 10px;"></div>
+        <div class="timer" id="timer-display">05:00</div>
+        <p>Use all 4 digits exactly once with +, -, ×, ÷ to make 24.</p>
+        
+        <div class="instructions">
+            💡 Typing help: Press <b>*</b> or <b>x</b> for <b>×</b> | Press <b>/</b> for <b>÷</b>
+        </div>
+        
+        <div class="num-container">
+            <div class="num-box" id="n1">-</div>
+            <div class="num-box" id="n2">-</div>
+            <div class="num-box" id="n3">-</div>
+            <div class="num-box" id="n4">-</div>
+        </div>
+
+        <div class="input-section" id="user-input-section">
+            <input type="text" id="user-input" placeholder="e.g., (5 - 1 - 0) × 6" oninput="sanitizeInput(this)">
+            <button class="success" onclick="checkUserAnswer()">Submit</button>
+        </div>
+
+        <div class="feedback" id="feedback-msg"></div>
+
+        <hr style="border: 0; border-top: 1px solid #eee; margin: 20px 0;">
+
+        <button id="next-btn" onclick="getSolvableCombination()">New Numbers</button>
+        <button class="secondary" id="reveal-btn" onclick="revealAnswerAndReset()">Show Answer</button>
+
+        <div class="answer-box" id="answer">
+            Possible Solution:<br>
+            <span id="solution-text"></span>
+            <div class="refresh-text" id="refresh-countdown"></div>
+        </div>
+        <br>
+        <button class="secondary" onclick="leaveGame()">Exit Game</button>
+    </div>
+</div>
+
+<script>
+    // --- FIREBASE CONFIGURATION ---
+    const firebaseConfig = {
+        apiKey: "AIzaSyBSpKz3tFMv0SyPGYdSaf-lYTYgzuP3CHw",
+        authDomain: "make-24-game.firebaseapp.com",
+        databaseURL: "https://make-24-game-default-rtdb.firebaseio.com",
+        projectId: "make-24-game",
+        storageBucket: "make-24-game.firebasestorage.app",
+        messagingSenderId: "269267174455",
+        appId: "1:269267174455:web:e70958fbadb2a3db28abb2",
+        measurementId: "G-EDKE7XQBTP"
+    };
+    
+    // Initialize Firebase via Compat/Legacy layer
+    let db = null;
+    if (typeof firebaseConfig !== 'undefined' && firebaseConfig.apiKey) {
+        firebase.initializeApp(firebaseConfig);
+        db = firebase.database();
+    }
+
+    // --- GAME STATE SYSTEM ---
+    let currentSolution = "";
+    let targetDigits = [];
+    let timerInterval = null;
+    let refreshInterval = null;
+    let timeRemaining = 300; 
+    let isMultiplayer = false;
+    let currentRoomId = null;
+    let myPlayerId = "player_" + Math.floor(Math.random() * 10000);
+
+    function showScreen(screenId) {
+        document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+        document.getElementById(screenId).classList.add('active');
+    }
+
+    // --- LOGIC: 24 MATHEMATICAL SOLVER ENGINE ---
+    function solve24(numbers, expressions) {
+        if (numbers.length === 1) {
+            return Math.abs(numbers[0] - 24) < 0.001;
+        }
+        for (let i = 0; i < numbers.length; i++) {
+            for (let j = 0; j < numbers.length; j++) {
+                if (i === j) continue;
+                let nextNums = [], nextExprs = [];
+                for (let k = 0; k < numbers.length; k++) {
+                    if (k !== i && k !== j) { nextNums.push(numbers[k]); nextExprs.push(expressions[k]); }
+                }
+                let n1 = numbers[i], n2 = numbers[j];
+                let e1 = expressions[i], e2 = expressions[j];
+
+                if (i < j) {
+                    nextNums.push(n1 + n2); nextExprs.push(`(${e1} + ${e2})`);
+                    if (solve24(nextNums, nextExprs)) { currentSolution = nextExprs[nextExprs.length-1]; return true; }
+                    nextNums.pop(); nextExprs.pop();
+                }
+                nextNums.push(n1 - n2); nextExprs.push(`(${e1} - ${e2})`);
+                if (solve24(nextNums, nextExprs)) { currentSolution = nextExprs[nextExprs.length-1]; return true; }
+                nextNums.pop(); nextExprs.pop();
+                if (i < j) {
+                    nextNums.push(n1 * n2); nextExprs.push(`(${e1} × ${e2})`);
+                    if (solve24(nextNums, nextExprs)) { currentSolution = nextExprs[nextExprs.length-1]; return true; }
+                    nextNums.pop(); nextExprs.pop();
+                }
+                if (Math.abs(n2) > 0.0001) {
+                    nextNums.push(n1 / n2); nextExprs.push(`(${e1} ÷ ${e2})`);
+                    if (solve24(nextNums, nextExprs)) { currentSolution = nextExprs[nextExprs.length-1]; return true; }
+                    nextNums.pop(); nextExprs.pop();
+                }
+            }
+        }
+        return false;
+    }
+
+    // --- LOGIC: GAME PLAYFLOW ---
+    function startSoloGame() {
+        isMultiplayer = false;
+        currentRoomId = null;
+        document.getElementById('game-title').innerText = "Solo Mode";
+        document.getElementById('room-display').innerText = "";
+        document.getElementById('next-btn').style.display = 'inline-block';
+        showScreen('game-screen');
+        getSolvableCombination();
+    }
+
+    function showLobbyMenu() {
+        if (!db) {
+            alert("Firebase connection missing. Please double-check your credentials setup.");
+            return;
+        }
+        showScreen('lobby-screen');
+    }
+
+    function sanitizeInput(inputField) {
+        let value = inputField.value;
+        value = value.replace(/\*/g, '×').replace(/x/g, '×').replace(/X/g, '×').replace(/\//g, '÷');
+        inputField.value = value;
+    }
+
+    function startTimer() {
+        clearInterval(timerInterval);
+        timeRemaining = 300; 
+        updateTimerDisplay();
+        timerInterval = setInterval(() => {
+            timeRemaining--;
+            updateTimerDisplay();
+            if (timeRemaining <= 0) {
+                clearInterval(timerInterval);
+                document.getElementById('feedback-msg').style.color = '#d32f2f';
+                document.getElementById('feedback-msg').innerText = "Time's up! Click New Numbers.";
+                document.getElementById('user-input-section').style.display = 'none';
+            }
+        }, 1000);
+    }
+
+    function updateTimerDisplay() {
+        let m = Math.floor(timeRemaining / 60).toString().padStart(2, '0');
+        let s = (timeRemaining % 60).toString().padStart(2, '0');
+        document.getElementById('timer-display').innerText = `${m}:${s}`;
+    }
+
+    function getSolvableCombination() {
+        clearInterval(refreshInterval);
+        
+        if (isMultiplayer) {
+            let digits = [];
+            while (true) {
+                digits = [Math.floor(Math.random()*10), Math.floor(Math.random()*10), Math.floor(Math.random()*10), Math.floor(Math.random()*10)];
+                if (solve24([...digits], digits.map(d=>d.toString()))) break;
+            }
+            if (currentSolution.startsWith('(') && currentSolution.endsWith(')')) currentSolution = currentSolution.slice(1, -1);
+            
+            db.ref('rooms/' + currentRoomId).update({
+                digits: digits,
+                solution: currentSolution,
+                winner: null,
+                status: "playing"
+            });
+            return;
+        }
+
+        while (true) {
+            let digits = [Math.floor(Math.random()*10), Math.floor(Math.random()*10), Math.floor(Math.random()*10), Math.floor(Math.random()*10)];
+            if (solve24([...digits], digits.map(d=>d.toString()))) {
+                if (currentSolution.startsWith('(') && currentSolution.endsWith(')')) currentSolution = currentSolution.slice(1, -1);
+                targetDigits = [...digits];
+                setupBoardUI(digits);
+                break;
+            }
+        }
+    }
+
+    function setupBoardUI(digits) {
+        document.getElementById('n1').innerText = digits[0];
+        document.getElementById('n2').innerText = digits[1];
+        document.getElementById('n3').innerText = digits[2];
+        document.getElementById('n4').innerText = digits[3];
+        document.getElementById('user-input-section').style.display = 'block';
+        if (!isMultiplayer) document.getElementById('reveal-btn').style.display = 'inline-block';
+        document.getElementById('answer').style.display = 'none';
+        document.getElementById('user-input').value = "";
+        document.getElementById('feedback-msg').innerText = "";
+        startTimer();
+    }
+
+    function checkUserAnswer() {
+        if (timeRemaining <= 0) return;
+        const feedback = document.getElementById('feedback-msg');
+        const inputRaw = document.getElementById('user-input').value;
+        const userDigits = inputRaw.match(/\d/g);
+
+        if (!userDigits || userDigits.length !== 4) {
+            feedback.style.color = '#d32f2f'; feedback.innerText = "Error: Use exactly 4 digits."; return;
+        }
+        if ([...targetDigits].sort().join('') !== [...userDigits].map(Number).sort().join('')) {
+            feedback.style.color = '#d32f2f'; feedback.innerText = "Error: Must use the generated numbers."; return;
+        }
+
+        let jsEvalString = inputRaw.replace(/×/g, '*').replace(/÷/g, '/');
+        try {
+            let result = Function(`"use strict"; return (${jsEvalString})`)();
+            if (Math.abs(result - 24) < 0.001) {
+                if (isMultiplayer) {
+                    db.ref('rooms/' + currentRoomId).update({ winner: myPlayerId });
+                } else {
+                    feedback.style.color = '#2e7d32';
+                    feedback.innerText = "Correct! Great job! 🎉";
+                    clearInterval(timerInterval);
+                    setTimeout(revealAnswerAndReset, 1500);
+                }
+            } else {
+                feedback.style.color = '#d32f2f'; feedback.innerText = `Incorrect: Equals ${result}, not 24.`;
+            }
+        } catch (e) {
+            feedback.style.color = '#d32f2f'; feedback.innerText = "Syntax Error: Check expression layout.";
+        }
+    }
+
+    function revealAnswerAndReset() {
+        clearInterval(timerInterval);
+        document.getElementById('user-input-section').style.display = 'none';
+        document.getElementById('reveal-btn').style.display = 'none';
+        document.getElementById('answer').style.display = 'block';
+        document.getElementById('solution-text').innerText = currentSolution + " = 24";
+        
+        let refreshSecs = 10;
+        const countdownDisplay = document.getElementById('refresh-countdown');
+        countdownDisplay.innerText = `Refreshing board in ${refreshSecs}s...`;
+        
+        clearInterval(refreshInterval);
+        refreshInterval = setInterval(() => {
+            refreshSecs--;
+            countdownDisplay.innerText = `Refreshing board in ${refreshSecs}s...`;
+            if (refreshSecs <= 0) {
+                clearInterval(refreshInterval);
+                getSolvableCombination();
+            }
+        }, 1000);
+    }
+
+    // --- LOGIC: MULTIPLAYER NETWORKING (FIREBASE) ---
+    function createRoom() {
+        currentRoomId = Math.floor(1000 + Math.random() * 9000).toString(); 
+        isMultiplayer = true;
+        
+        db.ref('rooms/' + currentRoomId).set({
+            status: "lobby",
+            digits: [0,0,0,0],
+            solution: "",
+            winner: null
+        }).then(() => {
+            listenToRoom();
+            document.getElementById('game-title').innerText = "Multiplayer Race";
+            document.getElementById('room-display').innerText = `Room Code: ${currentRoomId} (Host)`;
+            document.getElementById('next-btn').style.display = 'inline-block';
+            document.getElementById('reveal-btn').style.display = 'none'; 
+            showScreen('game-screen');
+            getSolvableCombination();
+        });
+    }
+
+    function joinRoom() {
+        let inputCode = document.getElementById('room-id-input').value.trim();
+        if (!inputCode) return;
+        
+        db.ref('rooms/' + inputCode).once('value', snapshot => {
+            if (snapshot.exists()) {
+                currentRoomId = inputCode;
+                isMultiplayer = true;
+                listenToRoom();
+                document.getElementById('game-title').innerText = "Multiplayer Race";
+                document.getElementById('room-display').innerText = `Room Code: ${currentRoomId} (Guest)`;
+                document.getElementById('next-btn').style.display = 'none'; 
+                document.getElementById('reveal-btn').style.display = 'none';
+                showScreen('game-screen');
+            } else {
+                alert("Room not found! Try another code.");
+            }
+        });
+    }
+
+    function listenToRoom() {
+        db.ref('rooms/' + currentRoomId).on('value', snapshot => {
+            const data = snapshot.val();
+            if (!data) return;
+
+            targetDigits = data.digits;
+            currentSolution = data.solution;
+
+            if (document.getElementById('n1').innerText !== String(targetDigits[0])) {
+                setupBoardUI(targetDigits);
+            }
+
+            if (data.winner) {
+                clearInterval(timerInterval);
+                document.getElementById('user-input-section').style.display = 'none';
+                const feedback = document.getElementById('feedback-msg');
+                
+                if (data.winner === myPlayerId) {
+                    feedback.style.color = '#2e7d32';
+                    feedback.innerText = "You Won! Speed Master! 🏆";
+                } else {
+                    feedback.style.color = '#d32f2f';
+                    feedback.innerText = "Another player found the solution first!";
+                }
+                
+                document.getElementById('answer').style.display = 'block';
+                document.getElementById('solution-text').innerText = currentSolution + " = 24";
+                document.getElementById('refresh-countdown').innerText = "Waiting for Host to start next round...";
+            }
+        });
+    }
+
+    function leaveGame() {
+        clearInterval(timerInterval);
+        clearInterval(refreshInterval);
+        if (isMultiplayer && currentRoomId) {
+            db.ref('rooms/' + currentRoomId).off();
+        }
+        showScreen('menu-screen');
+    }
+</script>
+
+</body>
+</html>
